@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Button } from '../button';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import LoginComponent from './SignUpComponent';
+import RegisterComponent from './LoginComponent';
 
 const Navbar = () =>
 {
@@ -92,16 +94,8 @@ const Navbar = () =>
 
                     {/* Auth Buttons */}
                     <div className="hidden md:flex items-center space-x-4">
-                        <Link to="/login">
-                            <Button variant="ghost" className="text-purple-600 hover:text-purple-600 hover:bg-blue-50">
-                                Log In
-                            </Button>
-                        </Link>
-                        <Link to="/signup">
-                            <Button className=" hover:text-purple-600 text-white">
-                                Sign Up
-                            </Button>
-                        </Link>
+                        <LoginComponent />
+                        <RegisterComponent />
                     </div>
 
                     {/* Mobile menu button */}
@@ -189,13 +183,7 @@ const Navbar = () =>
                             >
                                 Log In
                             </Link>
-                            <Link
-                                to="/signup"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-blue-50"
-                                onClick={() => setIsOpen(false)}
-                            >
-                                Sign Up
-                            </Link>
+                            <LoginComponent />
                         </div>
                     </div>
                 </div>
