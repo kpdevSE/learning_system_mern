@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/Home/index.jsx';
 import ContactPage from './pages/Contact/index.jsx';
 import AboutPage from './pages/About/index.jsx';
+import ErrorPage from './pages/404/index.jsx';
+import FooterComponent from './components/ui/Components/Footer.jsx';
 
 
 
@@ -22,15 +24,11 @@ function App()
 
             {/* Add a catch-all route for 404 errors */}
             <Route path="*" element={
-              <div className="container mx-auto px-4 py-16 text-center">
-                <h1 className="text-4xl font-bold mb-4">Page Not Found</h1>
-                <p className="text-lg mb-8">The page you're looking for doesn't exist or has been moved.</p>
-                <a href="/" className="text-blue-600 hover:underline">Go back to home</a>
-              </div>
+              <ErrorPage />
             } />
           </Routes>
         </main>
-
+        <FooterComponent />
       </div>
     </Router>
   );
