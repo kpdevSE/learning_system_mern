@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send, ArrowLeft, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
 import Navbar from '@/components/ui/Components/NavigationBar';
+import FooterComponent from '@/components/ui/Components/Footer';
 
 export default function ContactPage()
 {
@@ -253,6 +254,7 @@ export default function ContactPage()
                     </div>
                 </div>
             </div>
+            <FooterComponent />
         </div>
     );
 }

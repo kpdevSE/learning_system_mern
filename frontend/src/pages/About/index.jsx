@@ -3,6 +3,7 @@ import { ArrowLeft, Award, Globe, Users, Target, Check } from 'lucide-react';
 import Aboutus from '../../assets/aboutus.jpg'
 import Boy from '../../assets/boy.jpg'
 import Girl from '../../assets/girl.jpg'
+import FooterComponent from '@/components/ui/Components/Footer';
 
 export default function AboutPage()
 {
@@ -257,6 +258,7 @@ export default function AboutPage()
                     </div>
                 </div>
             </div>
+            <FooterComponent />
         </div>
     );
 }

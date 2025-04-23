@@ -8,6 +8,7 @@ import UIUXimage from '../../assets/uiux.jpg'
 import DataScience from '../../assets/datascience.jpg'
 import Girl from '../../assets/girl.jpg'
 import Boy from '../../assets/boy.jpg'
+import FooterComponent from '@/components/ui/Components/Footer';
 
 export default function LMSLandingPage()
 {
@@ -230,7 +231,7 @@ export default function LMSLandingPage()
             </section>
 
 
-
+            <FooterComponent />
         </div>
     );
 }
