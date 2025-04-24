@@ -18,14 +18,9 @@ export default function StudentSidebar()
         { icon: Home, name: "Dashboard", path: "/student/dashboard" },
         { icon: GraduationCap, name: "Profile", path: "/student/profile" },
         { icon: BookOpen, name: "My Courses", path: "/student/courses" },
-        { icon: Calendar, name: "Schedule", path: "/student/schedule" },
         { icon: FileText, name: "Assignments", path: "/student/assignments" },
-        { icon: Clock, name: "Progress Tracker", path: "/student/progress" },
-        { icon: MessageSquare, name: "Messages", path: "/student/messages" },
         { icon: Bell, name: "Notifications", path: "/student/notifications" },
-        { icon: BookmarkIcon, name: "Saved Resources", path: "/student/resources" },
         { icon: CreditCard, name: "Payments", path: "/student/payments" },
-        { icon: Award, name: "Certificates", path: "/student/certificates" },
     ];
 
     const handleLogout = async () =>
@@ -81,6 +76,7 @@ export default function StudentSidebar()
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    withCredentials: true,
                 });
 
 

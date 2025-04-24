@@ -76,6 +76,7 @@ export default function LecturerSidebar()
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
+                    withCredentials: true,
                 });
 
 

@@ -21,6 +21,10 @@ import EarningsPage from './pages/Lecturer/Pages/Earnings/index.jsx';
 import ReviewsPage from './pages/Lecturer/Pages/Reviews/index.jsx';
 import StudentDashboard from './pages/Students/Pages/Dashboard/index.jsx';
 import { Toaster } from './components/ui/sonner.jsx';
+import Assessments from './pages/Students/Pages/Assessments/index.jsx';
+import Courses from './pages/Students/Pages/Courses/index.jsx';
+import Payement from './pages/Students/Pages/Payment/index.jsx';
+import StudentProfilePage from './pages/Students/Pages/Profile/index.jsx';
 
 
 
@@ -57,7 +61,10 @@ function App()
 
             {/* Student Routes */}
             <Route path='/student/dashboard' element={<StudentDashboard />} />
-
+            <Route path='/student/assignments' element={<Assessments />} />
+            <Route path='/student/courses' element={<Courses />} />
+            <Route path='/student/payments' element={<Payement />} />
+            <Route path='/student/profile' element={<StudentProfilePage />} />
 
 
             {/* Add a catch-all route for 404 errors */}

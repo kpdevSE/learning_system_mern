@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+
 // DB Connection
 const connectDB = require('./config/db');
 
@@ -30,6 +31,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+
 
 // Create admin user on startup
 createAdminUser();
