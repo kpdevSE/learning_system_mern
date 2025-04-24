@@ -4,12 +4,14 @@ import { Button } from '../../../components/ui/button';
 import { Separator } from '../../../components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function StudentSidebar()
 {
     const [isMobileView, setIsMobileView] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [user, setUser] = useState()
+    const navigate = useNavigate();
 
     // Menu items for the student sidebar
     const menuItems = [
@@ -25,6 +27,25 @@ export default function StudentSidebar()
         { icon: CreditCard, name: "Payments", path: "/student/payments" },
         { icon: Award, name: "Certificates", path: "/student/certificates" },
     ];
+
+    const handleLogout = async () =>
+    {
+        try
+        {
+            // Remove JWT from localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            // Optionally call the backend logout endpoint (stateless)
+            await axios.post('http://localhost:5000/api/auth/logout');
+
+            // Redirect to login page
+            navigate('/');
+        } catch (error)
+        {
+            console.error('Logout error:', error);
+        }
+    };
 
 
 
@@ -166,8 +187,8 @@ export default function StudentSidebar()
                         <div className="flex items-center pt-2">
                             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
                             <div className="ml-3">
-                                <p className="text-sm font-medium">{user.name || "Student Name"}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user.email || "example@gmail.com"}</p>
+                                <p className="text-sm font-medium">{user?.name || "Student Name"}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "example@gmail.com"}</p>
                             </div>
                         </div>
                         <div className="mt-3 flex space-x-2">
@@ -175,7 +196,7 @@ export default function StudentSidebar()
                                 <Settings size={16} className="mr-1" />
                                 Settings
                             </Button>
-                            <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-500">
+                            <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-500" onClick={handleLogout}>
                                 <LogOut size={16} className="mr-1" />
                                 Log Out
                             </Button>

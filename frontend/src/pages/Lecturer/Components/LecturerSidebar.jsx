@@ -3,11 +3,15 @@ import { Menu, X, Home, Settings, Users, BarChart2, HelpCircle, Book, LogOut, Ca
 import { Button } from '../../../components/ui/button';
 import { Separator } from '../../../components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function LecturerSidebar()
 {
     const [isMobileView, setIsMobileView] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [user, setUser] = useState()
+    const navigate = useNavigate();
 
     // Menu items for the sidebar
     const menuItems = [
@@ -21,6 +25,25 @@ export default function LecturerSidebar()
         { icon: Star, name: "Reviews", path: "/lecturer/reviews" },
 
     ];
+
+    const handleLogout = async () =>
+    {
+        try
+        {
+            // Remove JWT from localStorage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+
+            // Optionally call the backend logout endpoint (stateless)
+            await axios.post('http://localhost:5000/api/auth/logout');
+
+            // Redirect to login page
+            navigate('/');
+        } catch (error)
+        {
+            console.error('Logout error:', error);
+        }
+    };
 
 
     useEffect(() =>
@@ -38,6 +61,33 @@ export default function LecturerSidebar()
 
 
         return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
+
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
     }, []);
 
     return (
@@ -113,11 +163,11 @@ export default function LecturerSidebar()
                         <div className="flex items-center pt-2">
                             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
                             <div className="ml-3">
-                                <p className="text-sm font-medium">User Name</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">user@example.com</p>
+                                <p className="text-sm font-medium">{user?.name || "User Name"}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "user@example.com"}</p>
                             </div>
                         </div>
-                        <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer'>
+                        <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer' onClick={handleLogout}>
                             <LogOut />
                             Log Out
                         </Button>

@@ -108,3 +108,26 @@ exports.login = async (req, res) =>
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
+// @desc    Logout user (stateless)
+// @route   POST /api/auth/logout
+// @access  Public
+exports.logout = async (req, res) =>
+{
+    try
+    {
+        // For stateless JWT authentication, server-side logout is essentially a no-op
+        // The actual logout happens on the client by removing the token
+
+        // Simply acknowledge the logout request
+        res.status(200).json({
+            success: true,
+            message: 'Logged out successfully'
+        });
+    } catch (error)
+    {
+        console.error('Logout error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};

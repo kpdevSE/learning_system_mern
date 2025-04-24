@@ -20,6 +20,7 @@ import AssessmentsPage from './pages/Lecturer/Pages/Assessments/index.jsx';
 import EarningsPage from './pages/Lecturer/Pages/Earnings/index.jsx';
 import ReviewsPage from './pages/Lecturer/Pages/Reviews/index.jsx';
 import StudentDashboard from './pages/Students/Pages/Dashboard/index.jsx';
+import { Toaster } from './components/ui/sonner.jsx';
 
 
 
@@ -29,6 +30,7 @@ function App()
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
+        <Toaster richColors position="top-right" />
         <main className="flex-grow">
           <Routes>
             {/* Public Routes */}

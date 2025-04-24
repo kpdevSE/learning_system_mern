@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 // import { useToast } from "@/components/ui/use-toast";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function RegisterComponent()
 {
@@ -63,7 +64,7 @@ export default function RegisterComponent()
             localStorage.setItem("userId", response.data.user._id);
 
 
-            alert("Logged Successfully")
+            toast.success("Login successfully")
 
             // Redirect based on role
             setTimeout(() =>
@@ -85,7 +86,7 @@ export default function RegisterComponent()
         } catch (error)
         {
             console.error("Login error:", error.response?.data || error.message);
-            alert("Login failed")
+            toast.error("Login Failed")
         } finally
         {
             setIsLoading(false);
@@ -99,13 +100,13 @@ export default function RegisterComponent()
         // Basic validation
         if (!registerData.name || !registerData.email || !registerData.password || !registerData.confirmPassword)
         {
-            alert("Pleasse fill all the feilds")
+            toast.error("Please fill the all feilds")
             return;
         }
 
         if (registerData.password !== registerData.confirmPassword)
         {
-            alert("Password Do not match")
+            toast.error("password do not match")
             return;
         }
 
@@ -113,9 +114,9 @@ export default function RegisterComponent()
         {
             setIsLoading(true);
             const response = await axios.post(`http://localhost:5000/api/auth/register`, registerData);
-            console.log(process.env.REACT_APP_API_URL)
 
-            alert("register successfully leas login")
+
+            toast.success("Registration Sucessfull. Please Login")
 
             // Reset form and switch to login tab
             setRegisterData({
@@ -135,7 +136,7 @@ export default function RegisterComponent()
         } catch (error)
         {
             console.error("Login error:", error.response?.data || error.message);
-            alert("something wrong")
+            toast.error("Something went wrong")
         } finally
         {
             setIsLoading(false);
