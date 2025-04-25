@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,22 +6,110 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import axios from "axios";
 
 export default function ProfilePage()
 {
-    const [profileData, setProfileData] = useState({
-        name: "Dr. Jane Smith",
-        email: "jane.smith@university.edu",
-        department: "Computer Science",
-        specialization: "Software Engineering",
-        bio: "Professor with 10+ years of experience in teaching and research. Focused on software architecture and design patterns."
-    });
 
-    const handleChange = (e) =>
+    const [name, setName] = useState();
+    const [workingeEmail, setWorkingEmail] = useState();
+    const [bio, setBio] = useState();
+    const [spcialization, setSpcialization] = useState();
+    const [department, setDepartment] = useState();
+    const [user, setUser] = useState([])
+    const [loggedUser, setLoggedUser] = useState({})
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) =>
     {
-        const { name, value } = e.target;
-        setProfileData(prev => ({ ...prev, [name]: value }));
+        e.preventDefault();
+        const payload = {
+            name,
+            workingeEmail,
+            bio,
+            spcialization,
+            department,
+        };
+
+        try
+        {
+            const token = localStorage.getItem('token');
+            console.log('Token:', token);
+            const response = await axios.post('http://localhost:5000/api/users/profile', payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+
+            });
+            console.log('Profile updated:', response.data);
+            toast.success("Profile updated successfully");
+        } catch (error)
+        {
+            console.error('Error updating profile:', error);
+            toast.error("Something went wrong");
+        }
     };
+
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/details`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    useEffect(() =>
+    {
+        const fetchUserNew = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true
+                });
+
+
+                setLoggedUser(response.data.data);
+                console.log(response.data.data)
+
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUserNew();
+    }, []);
+
+
+
 
     return (
         <div className="flex h-screen bg-gray-100">
@@ -45,24 +133,37 @@ export default function ProfilePage()
                                         <AvatarFallback>JS</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <CardTitle className="text-2xl">{profileData.name}</CardTitle>
-                                        <CardDescription>{profileData.email}</CardDescription>
+                                        <CardTitle className="text-2xl">{loggedUser?.name}</CardTitle>
+                                        <CardDescription>{loggedUser?.email}</CardDescription>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
+                                {user.length > 0 ? (
+                                    user.map((e) =>
+                                    {
+                                        return (
+
+                                            <CardContent className="space-y-4" key={e._id}>
+                                                <div>
+                                                    <h3 className="font-medium text-gray-500">Department</h3>
+                                                    <p>{user.department}</p>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium text-gray-500">Specialization</h3>
+                                                    <p>{user.spcialization}</p>
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-medium text-gray-500">Bio</h3>
+                                                    <p className="text-gray-700">{user.bio}</p>
+                                                </div>
+                                            </CardContent>
+                                        )
+                                    })
+                                ) : (
                                     <div>
-                                        <h3 className="font-medium text-gray-500">Department</h3>
-                                        <p>{profileData.department}</p>
+                                        <p>No Users Found .. Please Log In</p>
                                     </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-500">Specialization</h3>
-                                        <p>{profileData.specialization}</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-500">Bio</h3>
-                                        <p className="text-gray-700">{profileData.bio}</p>
-                                    </div>
-                                </CardContent>
+                                )}
+
                             </Card>
                         </TabsContent>
 
@@ -73,60 +174,73 @@ export default function ProfilePage()
                                     <CardDescription>Make changes to your profile information</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name">Name</Label>
-                                            <Input
-                                                id="name"
-                                                name="name"
-                                                value={profileData.name}
-                                                onChange={handleChange}
-                                            />
+                                    <form action="" onSubmit={handleSubmit}>
+
+                                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="name">Name</Label>
+                                                <Input
+                                                    id="name"
+                                                    name="name"
+                                                    value={name}
+                                                    onChange={(e) =>
+                                                    {
+                                                        setName(e.target.value)
+                                                    }
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="department">Department</Label>
+                                                <Input
+                                                    id="department"
+                                                    name="department"
+                                                    value={department}
+                                                    onChange={(e) =>
+                                                    {
+                                                        setDepartment(e.target.value)
+                                                    }
+                                                    }
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="specialization">Specialization</Label>
+                                                <Input
+                                                    id="specialization"
+                                                    name="specialization"
+                                                    value={spcialization}
+                                                    onChange={(e) =>
+                                                    {
+                                                        setSpcialization(e.target.value)
+                                                    }
+                                                    }
+                                                />
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="email">Email</Label>
-                                            <Input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                value={profileData.email}
-                                                onChange={handleChange}
+                                            <Label htmlFor="bio">Bio</Label>
+                                            <textarea
+                                                id="bio"
+                                                name="bio"
+                                                className="w-full min-h-24 p-2 border rounded-md"
+                                                value={bio}
+                                                onChange={(e) =>
+                                                {
+                                                    setBio(e.target.value)
+                                                }
+                                                }
                                             />
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="department">Department</Label>
-                                            <Input
-                                                id="department"
-                                                name="department"
-                                                value={profileData.department}
-                                                onChange={handleChange}
-                                            />
+                                        <div className="flex justify-end space-x-2">
+                                            <Button variant="outline">Cancel</Button>
+                                            <Button className="bg-black hover:bg-black" type="submit">Save Changes</Button>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="specialization">Specialization</Label>
-                                            <Input
-                                                id="specialization"
-                                                name="specialization"
-                                                value={profileData.specialization}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="bio">Bio</Label>
-                                        <textarea
-                                            id="bio"
-                                            name="bio"
-                                            className="w-full min-h-24 p-2 border rounded-md"
-                                            value={profileData.bio}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
+                                    </form>
                                 </CardContent>
-                                <CardFooter className="flex justify-end space-x-2">
-                                    <Button variant="outline">Cancel</Button>
-                                    <Button className="bg-black hover:bg-black">Save Changes</Button>
-                                </CardFooter>
+                                {/* <CardFooter className="flex justify-end space-x-2">
+                                  
+                                </CardFooter> */}
                             </Card>
                         </TabsContent>
                     </Tabs>

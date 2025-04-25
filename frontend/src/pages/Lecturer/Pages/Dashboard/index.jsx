@@ -3,7 +3,9 @@ import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, DollarSign, Star, Clock } from "lucide-react";
+import { Calendar, Users, DollarSign, Star, Clock, LoaderIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function LecturerDashboard()
 {
@@ -19,6 +21,36 @@ export default function LecturerDashboard()
         { id: 2, studentName: "Emma Watson", rating: 4, comment: "Clear explanations and patient." },
     ];
 
+    const [studentCount, setStudentCount] = useState(0);
+    const [loading, setLoading] = useState(false);
+
+
+    useEffect(() =>
+    {
+        const fetchStudentCount = async () =>
+        {
+            const token = localStorage.getItem('token');
+            try
+            {
+                setLoading(true)
+                const response = await axios.get('http://localhost:5000/api/users/student/count', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setStudentCount(response.data.total);
+
+            } catch (err)
+            {
+                console.error('Error fetching student count:', err);
+            }
+            setLoading(false)
+        };
+
+        fetchStudentCount();
+    }, []);
+
+
     return (
         <div className="flex min-h-screen bg-slate-50">
             <LecturerSidebar />
@@ -33,7 +65,15 @@ export default function LecturerDashboard()
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
                             </CardHeader>
                             <CardContent className="flex items-center justify-between">
-                                <span className="text-2xl font-bold">24</span>
+                                <span className="text-2xl font-bold">{
+                                    loading ? (
+                                        <div>
+                                            <LoaderIcon />
+                                        </div>) : (
+                                        <div>
+                                            {studentCount}
+                                        </div>
+                                    )}</span>
                                 <Users className="h-5 w-5 text-muted-foreground" />
                             </CardContent>
                         </Card>

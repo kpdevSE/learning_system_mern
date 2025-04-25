@@ -61,3 +61,19 @@ exports.updateUserProfile = async (req, res) =>
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+// Get Students Count
+
+// controller/userController.js
+exports.getStudentCount = async (req, res) =>
+{
+    try
+    {
+        const count = await User.countDocuments({ role: 'student' });
+        res.status(200).json({ success: true, total: count });
+    } catch (error)
+    {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+

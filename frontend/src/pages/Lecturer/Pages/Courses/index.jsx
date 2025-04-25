@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,7 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Edit, Trash2, BookOpen, Clock, Users, DollarSign, Star, FileText, Copy, Eye } from "lucide-react";
+import { PlusCircle, Edit, Trash2, BookOpen, Clock, Users, DollarSign, Star, FileText, Copy, Eye, Book, LucideEye } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 function CourseCard({ course, onEdit, onDelete, onDuplicate, onViewLessons })
 {
@@ -89,143 +92,143 @@ function CourseCard({ course, onEdit, onDelete, onDuplicate, onViewLessons })
 
 export default function CoursesPage()
 {
-    const [courses, setCourses] = useState([
-        {
-            id: 1,
-            title: "Business English for Professionals",
-            category: "Business English",
-            description: "Master business communication skills, industry vocabulary, and professional etiquette for the global workplace.",
-            level: "Intermediate",
-            lessons: 12,
-            duration: "6 weeks",
-            price: 120,
-            students: 18,
-            rating: 4.7,
-            status: "active",
-            image: "/business-english.jpg"
-        },
-        {
-            id: 2,
-            title: "IELTS Exam Preparation",
-            category: "IELTS Preparation",
-            description: "Comprehensive preparation for all sections of the IELTS exam with practice tests and personalized feedback.",
-            level: "Advanced",
-            lessons: 16,
-            duration: "8 weeks",
-            price: 180,
-            students: 24,
-            rating: 4.9,
-            status: "active",
-            image: "/ielts-preparation.jpg"
-        },
-        {
-            id: 3,
-            title: "Conversational English for Beginners",
-            category: "Conversational English",
-            description: "Build confidence in everyday conversations with practical vocabulary and authentic speaking practice.",
-            level: "Beginner",
-            lessons: 10,
-            duration: "5 weeks",
-            price: 90,
-            students: 15,
-            rating: 4.5,
-            status: "active",
-            image: "/conversational-english.jpg"
-        },
-        {
-            id: 4,
-            title: "English Grammar Mastery",
-            category: "General English",
-            description: "Comprehensive review of English grammar rules with exercises and practical applications.",
-            level: "Intermediate",
-            lessons: 8,
-            duration: "4 weeks",
-            price: 75,
-            students: 12,
-            rating: 4.3,
-            status: "draft",
-            image: "/grammar-mastery.jpg"
-        }
-    ]);
 
+    const [imageUrl, setImageUrl] = useState("");
+    const [topicOne, setTopicOne] = useState("");
+    const [topicTwo, setTopicTwo] = useState("");
+    const [smallDescription, setSmallDescription] = useState("");
+    const [fullDescription, setFullDescription] = useState("");
+    const [lessonsQuantity, setLessonsQuantity] = useState(0);
+    const [price, setPrice] = useState(0);
+    const [duration, setDuration] = useState("");
+    const [loggedUser, setLoggedUser] = useState({});
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
-    const [isEditCourseOpen, setIsEditCourseOpen] = useState(false);
-    const [isDeleteCourseOpen, setIsDeleteCourseOpen] = useState(false);
-    const [isViewLessonsOpen, setIsViewLessonsOpen] = useState(false);
-    const [currentCourse, setCurrentCourse] = useState(null);
-    const [newCourse, setNewCourse] = useState({
-        title: "",
-        category: "General English",
-        description: "",
-        level: "Intermediate",
-        lessons: 0,
-        duration: "",
-        price: 0,
-        status: "draft"
-    });
+    const [courseId, setCourseId] = useState(null);
+    const [open, setOpen] = useState(false);
+    const [course, setCourse] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Mock lesson data for the selected course
-    const mockLessons = [
-        { id: 1, title: "Introduction to Course Content", type: "Video", duration: "45 min", status: "published" },
-        { id: 2, title: "Key Vocabulary & Expressions", type: "Article", duration: "30 min", status: "published" },
-        { id: 3, title: "Grammar Review & Practice", type: "Interactive", duration: "60 min", status: "published" },
-        { id: 4, title: "Listening Comprehension", type: "Audio", duration: "40 min", status: "draft" },
-        { id: 5, title: "Speaking Practice Activities", type: "Video", duration: "45 min", status: "draft" }
-    ];
-
-    const handleAddCourse = () =>
+    // Logged User email getting
+    useEffect(() =>
     {
-        const id = courses.length > 0 ? Math.max(...courses.map(course => course.id)) + 1 : 1;
-        setCourses([...courses, { ...newCourse, id, students: 0, rating: 0 }]);
-        setIsAddCourseOpen(false);
-        setNewCourse({
-            title: "",
-            category: "General English",
-            description: "",
-            level: "Intermediate",
-            lessons: 0,
-            duration: "",
-            price: 0,
-            status: "draft"
-        });
-    };
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
 
-    const handleEditCourse = () =>
-    {
-        setCourses(courses.map(course => course.id === currentCourse.id ? currentCourse : course));
-        setIsEditCourseOpen(false);
-    };
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
 
-    const handleDeleteCourse = () =>
-    {
-        setCourses(courses.filter(course => course.id !== currentCourse.id));
-        setIsDeleteCourseOpen(false);
-    };
 
-    const duplicateCourse = (course) =>
-    {
-        const id = Math.max(...courses.map(course => course.id)) + 1;
-        const duplicatedCourse = { ...course, id, title: `${course.title} (Copy)`, students: 0, status: "draft" };
-        setCourses([...courses, duplicatedCourse]);
-    };
-
-    const courseCategories = ["General English", "Business English", "IELTS Preparation", "Conversational English", "Academic English"];
-    const courseLevels = ["Beginner", "Elementary", "Intermediate", "Upper Intermediate", "Advanced", "Proficient"];
-
-    const getCourseStatusBadge = (status) =>
-    {
-        const statusStyles = {
-            active: "bg-green-100 text-green-800",
-            draft: "bg-yellow-100 text-yellow-800",
-            archived: "bg-gray-100 text-gray-800"
+                setLoggedUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
         };
 
-        return (
-            <Badge className={statusStyles[status]}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-            </Badge>
-        );
+        fetchUser();
+    }, []);
+
+    console.log(loggedUser.email)
+
+    // Get CourseBy Email
+    const [myCourses, setMyCourses] = useState([]);
+
+    useEffect(() =>
+    {
+        const fetchMyCourses = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem("token");
+                const res = await axios.get("http://localhost:5000/api/users/mycourses", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setMyCourses(res.data.data);
+                console.log(res.data.data);
+            } catch (err)
+            {
+                console.error("Error fetching my courses:", err);
+            }
+        };
+
+        fetchMyCourses();
+    }, []);
+
+
+    // Create a Course function
+    const handleCreateCourse = async (e) =>
+    {
+        e.preventDefault();
+
+        const payload = {
+            lecturerEmail: loggedUser.email,
+            imageUrl,
+            topicOne,
+            topicTwo,
+            smallDescription,
+            fullDescription,
+            lessonsQuantity,
+            price,
+            duration,
+        };
+
+        try
+        {
+            const token = localStorage.getItem('token');
+            const res = await axios.post('http://localhost:5000/api/users/create', payload, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            console.log("Course created:", res.data);
+            toast.success("Course created!");
+        } catch (error)
+        {
+            console.error("Course creation failed:", error);
+            toast.error("Failed to create course");
+        }
     };
+
+    // Fetching Course Details 
+    useEffect(() =>
+    {
+        const fetchCourseDetails = async () =>
+        {
+            try
+            {
+                const res = await axios.get(`http://localhost:5000/api/users/corses/${courseId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                setCourse(res.data.data);
+            } catch (err)
+            {
+                console.error("Error fetching course:", err);
+            } finally
+            {
+                setLoading(false);
+            }
+        };
+
+        if (open && courseId)
+        {
+            setLoading(true);
+            fetchCourseDetails();
+        }
+    }, [open, courseId]);
 
     return (
         <div className="flex min-h-screen bg-slate-50">
@@ -240,151 +243,102 @@ export default function CoursesPage()
                         </Button>
                     </div>
 
-                    <Tabs defaultValue="active">
-                        <TabsList className="grid grid-cols-3 w-full max-w-md mb-6">
-                            <TabsTrigger value="active">Active Courses</TabsTrigger>
-                            <TabsTrigger value="draft">Drafts</TabsTrigger>
-                            <TabsTrigger value="all">All Courses</TabsTrigger>
-                        </TabsList>
+                    <div className="grid lg:grid-cols-3 gap-3  md:grid-cols-2 grid-cols-1 place-content-center place-items-center">
+                        {
+                            myCourses.length > 0 ? (
+                                myCourses.map((course) =>
+                                {
+                                    return (
+                                        <div className="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between h-full">
+                                            <div>
+                                                <div className="w-full h-32 bg-gray-100 rounded flex items-center justify-center mb-4">
 
-                        <TabsContent value="active">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {courses.filter(course => course.status === "active").map((course) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        onEdit={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsEditCourseOpen(true);
-                                        }}
-                                        onDelete={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsDeleteCourseOpen(true);
-                                        }}
-                                        onDuplicate={() => duplicateCourse(course)}
-                                        onViewLessons={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsViewLessonsOpen(true);
-                                        }}
-                                    />
-                                ))}
-                                {courses.filter(course => course.status === "active").length === 0 && (
-                                    <div className="col-span-3 text-center p-10 border rounded-lg bg-white">
-                                        <p className="text-muted-foreground">No active courses. Create a new course or publish a draft.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </TabsContent>
+                                                    <img src={course.imageUrl} alt="" className="w-full h-full" />
+                                                </div>
+                                                <h3 className="text-lg font-semibold">{course.topicOne}</h3>
+                                                <p className="text-sm text-muted-foreground">{course.topicTwo}</p>
+                                                <p className="text-sm text-gray-600 mt-2 line-clamp-2">{course.smallDescription}</p>
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mt-4">
+                                                    <div className="flex items-center gap-1">
+                                                        <Users className="w-4 h-4" /> {course.students || 0} Students
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <Clock className="w-4 h-4" /> {course.duration}
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <FileText className="w-4 h-4" /> {course.lessonsQuantity} Lessons
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <DollarSign className="w-4 h-4" /> ${course.price}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1 mt-2 text-yellow-500 text-sm font-medium">
+                                                    <Star className="w-4 h-4" /> {course.rating || "4.7"}
+                                                </div>
+                                            </div>
 
-                        <TabsContent value="draft">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {courses.filter(course => course.status === "draft").map((course) => (
-                                    <CourseCard
-                                        key={course.id}
-                                        course={course}
-                                        onEdit={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsEditCourseOpen(true);
-                                        }}
-                                        onDelete={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsDeleteCourseOpen(true);
-                                        }}
-                                        onDuplicate={() => duplicateCourse(course)}
-                                        onViewLessons={() =>
-                                        {
-                                            setCurrentCourse(course);
-                                            setIsViewLessonsOpen(true);
-                                        }}
-                                    />
-                                ))}
-                                {courses.filter(course => course.status === "draft").length === 0 && (
-                                    <div className="col-span-3 text-center p-10 border rounded-lg bg-white">
-                                        <p className="text-muted-foreground">No draft courses. Create a new course to get started.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </TabsContent>
+                                            <div className="mt-4 flex justify-between items-center">
+                                                <div className="flex gap-2">
+                                                    <Button variant="outline" size="sm" >Edit</Button>
+                                                    <Button variant="outline" size="sm" >Lessons</Button>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Dialog open={open} onOpenChange={setOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                onClick={() => setCourseId(course._id)}
+                                                            >
+                                                                <LucideEye className="w-4 h-4" />
+                                                            </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[600px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Course Details</DialogTitle>
+                                                                <DialogDescription>
+                                                                    {loading ? "Loading..." : course?.topicOne}
+                                                                </DialogDescription>
+                                                            </DialogHeader>
 
-                        <TabsContent value="all">
-                            <Table>
-                                <TableCaption>A list of all your courses</TableCaption>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[300px]">Course Name</TableHead>
-                                        <TableHead>Category</TableHead>
-                                        <TableHead>Level</TableHead>
-                                        <TableHead>Price</TableHead>
-                                        <TableHead>Students</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {courses.map((course) => (
-                                        <TableRow key={course.id}>
-                                            <TableCell className="font-medium">{course.title}</TableCell>
-                                            <TableCell>{course.category}</TableCell>
-                                            <TableCell>{course.level}</TableCell>
-                                            <TableCell>${course.price}</TableCell>
-                                            <TableCell>{course.students}</TableCell>
-                                            <TableCell>{getCourseStatusBadge(course.status)}</TableCell>
-                                            <TableCell className="text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                        {
-                                                            setCurrentCourse(course);
-                                                            setIsViewLessonsOpen(true);
-                                                        }}
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                        {
-                                                            setCurrentCourse(course);
-                                                            setIsEditCourseOpen(true);
-                                                        }}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => duplicateCourse(course)}
-                                                    >
-                                                        <Copy className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-red-500 hover:text-red-600"
-                                                        onClick={() =>
-                                                        {
-                                                            setCurrentCourse(course);
-                                                            setIsDeleteCourseOpen(true);
-                                                        }}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
+                                                            {loading ? (
+                                                                <div className="text-center py-6">Loading...</div>
+                                                            ) : course ? (
+                                                                <div className="space-y-4">
+                                                                    <div className="w-full h-40 bg-gray-100 rounded overflow-hidden">
+                                                                        <img src={course.imageUrl} alt="" className="w-full h-full object-cover" />
+                                                                    </div>
+                                                                    <h2 className="text-xl font-bold">{course.topicOne}</h2>
+                                                                    <p className="text-muted-foreground">{course.topicTwo}</p>
+                                                                    <p className="text-gray-600">{course.fullDescription}</p>
+                                                                    <p className="text-gray-600">{course.smallDescription}</p>
+                                                                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                                                                        <div><strong>Lessons:</strong> {course.lessonsQuantity}</div>
+                                                                        <div><strong>Duration:</strong> {course.duration}</div>
+                                                                        <div><strong>Price:</strong> ${course.price}</div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-center py-6">Course not found.</div>
+                                                            )}
+
+                                                            <DialogFooter>
+                                                                <Button onClick={() => setOpen(false)}>Close</Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                    <Button variant="ghost" size="icon" className="text-red-500" >
+                                                        <Trash2 className="w-4 h-4" />
                                                     </Button>
                                                 </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TabsContent>
-                    </Tabs>
+                                            </div>
+                                        </div>
+
+                                    )
+                                })
+                            ) : (<div>No courses found</div>)
+                        }
+                    </div>
 
                     {/* Add Course Dialog */}
                     <Dialog open={isAddCourseOpen} onOpenChange={setIsAddCourseOpen}>
@@ -392,74 +346,73 @@ export default function CoursesPage()
                             <DialogHeader>
                                 <DialogTitle>Create New Course</DialogTitle>
                                 <DialogDescription>
-                                    Add a new course to your teaching portfolio.
+                                    Fill in the course details to publish it.
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="title">Course Title</Label>
+                                        <Label htmlFor="imageUrl">Course Image URL</Label>
                                         <Input
-                                            id="title"
-                                            value={newCourse.title}
-                                            onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
-                                            placeholder="e.g. Business English for Professionals"
+                                            id="imageUrl"
+                                            value={imageUrl}
+                                            onChange={(e) => setImageUrl(e.target.value)}
+                                            placeholder="https://example.com/image.jpg"
+                                            className="mt-3"
                                         />
                                     </div>
-
                                     <div>
-                                        <Label htmlFor="category">Category</Label>
-                                        <Select
-                                            value={newCourse.category}
-                                            onValueChange={(value) => setNewCourse({ ...newCourse, category: value })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select category" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {courseCategories.map(category => (
-                                                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="level">Level</Label>
-                                        <Select
-                                            value={newCourse.level}
-                                            onValueChange={(value) => setNewCourse({ ...newCourse, level: value })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select level" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {courseLevels.map(level => (
-                                                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    <div>
-                                        <Label htmlFor="lessons">Number of Lessons</Label>
+                                        <Label htmlFor="topicOne">Topic One</Label>
                                         <Input
-                                            id="lessons"
-                                            type="number"
-                                            value={newCourse.lessons}
-                                            onChange={(e) => setNewCourse({ ...newCourse, lessons: parseInt(e.target.value) })}
+                                            id="topicOne"
+                                            value={topicOne}
+                                            onChange={(e) => setTopicOne(e.target.value)}
+                                            placeholder="e.g. Web Development Basics"
+                                            className="mt-3"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="topicTwo">Topic Two</Label>
+                                        <Input
+                                            id="topicTwo"
+                                            value={topicTwo}
+                                            onChange={(e) => setTopicTwo(e.target.value)}
+                                            placeholder="Optional secondary topic"
+                                            className="mt-3"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="smallDescription">Short Description</Label>
+                                        <Textarea
+                                            id="smallDescription"
+                                            value={smallDescription}
+                                            onChange={(e) => setSmallDescription(e.target.value)}
+                                            rows={2}
+                                            placeholder="A brief summary of your course"
+                                            className="mt-3"
                                         />
                                     </div>
                                 </div>
-
                                 <div className="space-y-4">
                                     <div>
-                                        <Label htmlFor="duration">Duration</Label>
+                                        <Label htmlFor="fullDescription">Full Description</Label>
+                                        <Textarea
+                                            id="fullDescription"
+                                            value={fullDescription}
+                                            onChange={(e) => setFullDescription(e.target.value)}
+                                            rows={4}
+                                            placeholder="Detailed course explanation"
+                                            className="mt-3"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="lessonsQuantity">Number of Lessons</Label>
                                         <Input
-                                            id="duration"
-                                            value={newCourse.duration}
-                                            onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })}
-                                            placeholder="e.g. 6 weeks"
+                                            id="lessonsQuantity"
+                                            type="number"
+                                            value={lessonsQuantity}
+                                            onChange={(e) => setLessonsQuantity(parseInt(e.target.value))}
+                                            className="mt-3"
                                         />
                                     </div>
 
@@ -468,245 +421,30 @@ export default function CoursesPage()
                                         <Input
                                             id="price"
                                             type="number"
-                                            value={newCourse.price}
-                                            onChange={(e) => setNewCourse({ ...newCourse, price: parseFloat(e.target.value) })}
+                                            value={price}
+                                            onChange={(e) => setPrice(parseFloat(e.target.value))}
+                                            className="mt-3"
                                         />
                                     </div>
 
                                     <div>
-                                        <Label htmlFor="description">Description</Label>
-                                        <Textarea
-                                            id="description"
-                                            value={newCourse.description}
-                                            onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
-                                            placeholder="Describe what students will learn in this course"
-                                            rows={4}
+                                        <Label htmlFor="duration">Duration</Label>
+                                        <Input
+                                            id="duration"
+                                            value={duration}
+                                            onChange={(e) => setDuration(e.target.value)}
+                                            placeholder="e.g. 6 weeks"
+                                            className="mt-3"
                                         />
-                                    </div>
-
-                                    <div className="flex items-center space-x-2 pt-4">
-                                        <Switch
-                                            id="publish"
-                                            checked={newCourse.status === "active"}
-                                            onCheckedChange={(checked) => setNewCourse({ ...newCourse, status: checked ? "active" : "draft" })}
-                                        />
-                                        <Label htmlFor="publish">Publish immediately</Label>
                                     </div>
                                 </div>
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsAddCourseOpen(false)}>Cancel</Button>
-                                <Button onClick={handleAddCourse} className="bg-black hover:bg-black">Create Course</Button>
+                                <Button onClick={handleCreateCourse} className="bg-black hover:bg-black">Create Course</Button>
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
-
-                    {/* Edit Course Dialog */}
-                    {currentCourse && (
-                        <Dialog open={isEditCourseOpen} onOpenChange={setIsEditCourseOpen}>
-                            <DialogContent className="sm:max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Edit Course</DialogTitle>
-                                    <DialogDescription>
-                                        Modify the details of your course.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="edit-title">Course Title</Label>
-                                            <Input
-                                                id="edit-title"
-                                                value={currentCourse.title}
-                                                onChange={(e) => setCurrentCourse({ ...currentCourse, title: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="edit-category">Category</Label>
-                                            <Select
-                                                value={currentCourse.category}
-                                                onValueChange={(value) => setCurrentCourse({ ...currentCourse, category: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select category" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {courseCategories.map(category => (
-                                                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="edit-level">Level</Label>
-                                            <Select
-                                                value={currentCourse.level}
-                                                onValueChange={(value) => setCurrentCourse({ ...currentCourse, level: value })}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select level" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {courseLevels.map(level => (
-                                                        <SelectItem key={level} value={level}>{level}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="edit-lessons">Number of Lessons</Label>
-                                            <Input
-                                                id="edit-lessons"
-                                                type="number"
-                                                value={currentCourse.lessons}
-                                                onChange={(e) => setCurrentCourse({ ...currentCourse, lessons: parseInt(e.target.value) })}
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="edit-duration">Duration</Label>
-                                            <Input
-                                                id="edit-duration"
-                                                value={currentCourse.duration}
-                                                onChange={(e) => setCurrentCourse({ ...currentCourse, duration: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="edit-price">Price ($)</Label>
-                                            <Input
-                                                id="edit-price"
-                                                type="number"
-                                                value={currentCourse.price}
-                                                onChange={(e) => setCurrentCourse({ ...currentCourse, price: parseFloat(e.target.value) })}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="edit-description">Description</Label>
-                                            <Textarea
-                                                id="edit-description"
-                                                value={currentCourse.description}
-                                                onChange={(e) => setCurrentCourse({ ...currentCourse, description: e.target.value })}
-                                                rows={4}
-                                            />
-                                        </div>
-
-                                        <div className="flex items-center space-x-2 pt-4">
-                                            <Switch
-                                                id="edit-status"
-                                                checked={currentCourse.status === "active"}
-                                                onCheckedChange={(checked) => setCurrentCourse({ ...currentCourse, status: checked ? "active" : "draft" })}
-                                            />
-                                            <Label htmlFor="edit-status">
-                                                {currentCourse.status === "active" ? "Published" : "Publish course"}
-                                            </Label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button variant="outline" onClick={() => setIsEditCourseOpen(false)}>Cancel</Button>
-                                    <Button onClick={handleEditCourse} className="bg-black hover:bg-black">Save Changes</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
-
-                    {/* Delete Course Confirmation Dialog */}
-                    {currentCourse && (
-                        <Dialog open={isDeleteCourseOpen} onOpenChange={setIsDeleteCourseOpen}>
-                            <DialogContent className="sm:max-w-md">
-                                <DialogHeader>
-                                    <DialogTitle>Delete Course</DialogTitle>
-                                    <DialogDescription>
-                                        Are you sure you want to delete "{currentCourse.title}"? This action cannot be undone.
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="pt-4">
-                                    {currentCourse.students > 0 && (
-                                        <div className="p-4 mb-4 bg-yellow-50 text-yellow-800 rounded-md">
-                                            <p>Warning: This course has {currentCourse.students} enrolled students. Deleting it will remove their access.</p>
-                                        </div>
-                                    )}
-                                </div>
-                                <DialogFooter>
-                                    <Button variant="outline" onClick={() => setIsDeleteCourseOpen(false)}>Cancel</Button>
-                                    <Button variant="destructive" onClick={handleDeleteCourse}>Delete Course</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
-
-                    {/* Course Lessons Dialog */}
-                    {currentCourse && (
-                        <Dialog open={isViewLessonsOpen} onOpenChange={setIsViewLessonsOpen}>
-                            <DialogContent className="sm:max-w-3xl">
-                                <DialogHeader>
-                                    <DialogTitle>Course Lessons</DialogTitle>
-                                    <DialogDescription>
-                                        Manage lessons for "{currentCourse.title}"
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <h3 className="text-lg font-medium">Lessons ({mockLessons.length})</h3>
-                                        <Button size="sm" className="flex items-center gap-1 bg-black hover:bg-black">
-                                            <PlusCircle className="h-4 w-4" />
-                                            <span>Add Lesson</span>
-                                        </Button>
-                                    </div>
-
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Title</TableHead>
-                                                <TableHead>Type</TableHead>
-                                                <TableHead>Duration</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {mockLessons.map((lesson) => (
-                                                <TableRow key={lesson.id}>
-                                                    <TableCell className="font-medium">{lesson.title}</TableCell>
-                                                    <TableCell>{lesson.type}</TableCell>
-                                                    <TableCell>{lesson.duration}</TableCell>
-                                                    <TableCell>
-                                                        <Badge className={
-                                                            lesson.status === "published"
-                                                                ? "bg-green-100 text-green-800"
-                                                                : "bg-yellow-100 text-yellow-800"
-                                                        }>
-                                                            {lesson.status}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <div className="flex justify-end gap-2">
-                                                            <Button variant="ghost" size="icon">
-                                                                <Edit className="h-4 w-4" />
-                                                            </Button>
-                                                            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                                <DialogFooter>
-                                    <Button onClick={() => setIsViewLessonsOpen(false)} className="bg-black hover:bg-black">Close</Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
                 </div>
             </div>
         </div>
