@@ -96,3 +96,52 @@ exports.getCourseById = async (req, res) =>
     }
 };
 
+// Delete Course 
+// Delete course
+exports.deleteCourseById = async (req, res) =>
+{
+
+    try
+    {
+        const courseId = req.params.id;
+        const deletedCourse = await Course.findByIdAndDelete(courseId);
+
+        if (!deletedCourse)
+        {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json({ message: "Course deleted successfully" });
+    } catch (error)
+    {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Update Courses
+
+// Update course
+exports.updateCourseById = async (req, res) =>
+{
+    try
+    {
+        const courseId = req.params.id;
+        const updatedCourse = await Course.findByIdAndUpdate(
+            courseId,
+            { $set: req.body },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedCourse)
+        {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.status(200).json({ message: "Course updated successfully", data: updatedCourse });
+    } catch (error)
+    {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+

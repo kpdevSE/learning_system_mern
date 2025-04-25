@@ -1,94 +1,14 @@
 import { useEffect, useState } from "react";
 import LecturerSidebar from "../../Components/LecturerSidebar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Edit, Trash2, BookOpen, Clock, Users, DollarSign, Star, FileText, Copy, Eye, Book, LucideEye } from "lucide-react";
+import { PlusCircle, Trash2, Clock, Users, DollarSign, Star, FileText, LucideEye } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
 
-function CourseCard({ course, onEdit, onDelete, onDuplicate, onViewLessons })
-{
-    return (
-        <Card className="overflow-hidden">
-            <div className="h-40 bg-slate-200 flex items-center justify-center">
-                <BookOpen className="h-12 w-12 text-slate-400" />
-            </div>
-            <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="text-lg">{course.title}</CardTitle>
-                        <CardDescription>{course.category}</CardDescription>
-                    </div>
-                    {course.status === "draft" && (
-                        <Badge className="bg-yellow-100 text-yellow-800">Draft</Badge>
-                    )}
-                </div>
-            </CardHeader>
-            <CardContent className="pb-2">
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-4">{course.description}</p>
-                <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4 text-slate-400" />
-                        <span>{course.students} Students</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4 text-slate-400" />
-                        <span>{course.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <FileText className="h-4 w-4 text-slate-400" />
-                        <span>{course.lessons} Lessons</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4 text-slate-400" />
-                        <span>${course.price}</span>
-                    </div>
-                </div>
-                {course.rating > 0 && (
-                    <div className="flex items-center gap-1 mt-2">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm">{course.rating.toFixed(1)}</span>
-                    </div>
-                )}
-            </CardContent>
-            <CardFooter className="flex justify-between pt-2">
-                <div className="flex gap-1">
-                    <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
-                    <Button variant="outline" size="sm" onClick={onViewLessons}>Lessons</Button>
-                </div>
-                <div className="flex gap-1">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onDuplicate}
-                        title="Duplicate"
-                    >
-                        <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-red-500 hover:text-red-600"
-                        onClick={onDelete}
-                        title="Delete"
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-            </CardFooter>
-        </Card>
-    );
-}
 
 export default function CoursesPage()
 {
@@ -105,8 +25,18 @@ export default function CoursesPage()
     const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
     const [courseId, setCourseId] = useState(null);
     const [open, setOpen] = useState(false);
-    const [course, setCourse] = useState(null);
+    const [courseDetails, setCourseDetails] = useState({});
     const [loading, setLoading] = useState(true);
+    const [formData, setFormData] = useState({
+        topicOne: "",
+        topicTwo: "",
+        smallDescription: "",
+        fullDescription: "",
+        lessonsQuantity: 0,
+        price: 0,
+        duration: "",
+        imageUrl: "",
+    });
 
     // Logged User email getting
     useEffect(() =>
@@ -194,6 +124,7 @@ export default function CoursesPage()
 
             console.log("Course created:", res.data);
             toast.success("Course created!");
+            window.location.reload()
         } catch (error)
         {
             console.error("Course creation failed:", error);
@@ -208,12 +139,14 @@ export default function CoursesPage()
         {
             try
             {
-                const res = await axios.get(`http://localhost:5000/api/users/corses/${courseId}`, {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/users/courses/${courseId}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     }
                 });
-                setCourse(res.data.data);
+                setCourseDetails(res.data.data);
+                console.log(res.data.data)
             } catch (err)
             {
                 console.error("Error fetching course:", err);
@@ -229,6 +162,70 @@ export default function CoursesPage()
             fetchCourseDetails();
         }
     }, [open, courseId]);
+
+
+
+    const handleChange = (e) =>
+    {
+        const { name, value } = e.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+
+    // Update Courses
+    const handleSubmit = async (e) =>
+    {
+        e.preventDefault();
+        try
+        {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:5000/api/users/courses/${courseId}`,
+                formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+            );
+            if (response.status === 200)
+            {
+                toast.success("Course updated successfully!");
+                window.location.reload()
+            }
+        } catch (error)
+        {
+            console.error("Error updating course:", error);
+            toast.error("Failed to update course.");
+        }
+    };
+
+    // Delete Course
+    const handleDelete = async () =>
+    {
+        try
+        {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(`http://localhost:5000/api/users/courses/${courseId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            console.log(courseId)
+            if (response.status === 200)
+            {
+
+                toast.success("Course deleted successfully!");
+                onCourseDeleted(courseId);
+                window.location.reload()
+            }
+        } catch (error)
+        {
+            console.error("Error deleting course:", error);
+            toast.error("Failed to delete course.");
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-slate-50">
@@ -249,7 +246,7 @@ export default function CoursesPage()
                                 myCourses.map((course) =>
                                 {
                                     return (
-                                        <div className="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between h-full">
+                                        <div className="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between h-full " key={course._id}>
                                             <div>
                                                 <div className="w-full h-32 bg-gray-100 rounded flex items-center justify-center mb-4">
 
@@ -279,7 +276,122 @@ export default function CoursesPage()
 
                                             <div className="mt-4 flex justify-between items-center">
                                                 <div className="flex gap-2">
-                                                    <Button variant="outline" size="sm" >Edit</Button>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="outline" size="sm" onClick={() => setCourseId(course._id)}>Edit Course</Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[425px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Edit Course</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Make changes to the course details here. Click save when you're done.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="topicOne" className="text-right">
+                                                                        Topic One
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="topicOne"
+                                                                        name="topicOne"
+                                                                        value={formData.topicOne}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="topicTwo" className="text-right">
+                                                                        Topic Two
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="topicTwo"
+                                                                        name="topicTwo"
+                                                                        value={formData.topicTwo}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="smallDescription" className="text-right">
+                                                                        Small Description
+                                                                    </Label>
+                                                                    <textarea
+                                                                        id="smallDescription"
+                                                                        name="smallDescription"
+                                                                        value={formData.smallDescription}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3 p-2 border rounded-md"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="fullDescription" className="text-right">
+                                                                        Full Description
+                                                                    </Label>
+                                                                    <textarea
+                                                                        id="fullDescription"
+                                                                        name="fullDescription"
+                                                                        value={formData.fullDescription}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3 p-2 border rounded-md"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="lessonsQuantity" className="text-right">
+                                                                        Lessons Quantity
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="lessonsQuantity"
+                                                                        name="lessonsQuantity"
+                                                                        value={formData.lessonsQuantity}
+                                                                        onChange={handleChange}
+                                                                        type="number"
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="price" className="text-right">
+                                                                        Price
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="price"
+                                                                        name="price"
+                                                                        value={formData.price}
+                                                                        onChange={handleChange}
+                                                                        type="number"
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="duration" className="text-right">
+                                                                        Duration
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="duration"
+                                                                        name="duration"
+                                                                        value={formData.duration}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <div className="grid grid-cols-4 items-center gap-4">
+                                                                    <Label htmlFor="imageUrl" className="text-right">
+                                                                        Image URL
+                                                                    </Label>
+                                                                    <Input
+                                                                        id="imageUrl"
+                                                                        name="imageUrl"
+                                                                        value={formData.imageUrl}
+                                                                        onChange={handleChange}
+                                                                        className="col-span-3"
+                                                                    />
+                                                                </div>
+                                                                <DialogFooter>
+                                                                    <Button type="submit">Save changes</Button>
+                                                                </DialogFooter>
+                                                            </form>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                     <Button variant="outline" size="sm" >Lessons</Button>
                                                 </div>
                                                 <div className="flex gap-2">
@@ -297,25 +409,25 @@ export default function CoursesPage()
                                                             <DialogHeader>
                                                                 <DialogTitle>Course Details</DialogTitle>
                                                                 <DialogDescription>
-                                                                    {loading ? "Loading..." : course?.topicOne}
+                                                                    {loading ? "Loading..." : courseDetails?.topicOne}
                                                                 </DialogDescription>
                                                             </DialogHeader>
 
                                                             {loading ? (
                                                                 <div className="text-center py-6">Loading...</div>
-                                                            ) : course ? (
+                                                            ) : courseDetails ? (
                                                                 <div className="space-y-4">
                                                                     <div className="w-full h-40 bg-gray-100 rounded overflow-hidden">
-                                                                        <img src={course.imageUrl} alt="" className="w-full h-full object-cover" />
+                                                                        <img src={courseDetails?.imageUrl} alt="" className="w-full h-full object-cover" />
                                                                     </div>
-                                                                    <h2 className="text-xl font-bold">{course.topicOne}</h2>
-                                                                    <p className="text-muted-foreground">{course.topicTwo}</p>
-                                                                    <p className="text-gray-600">{course.fullDescription}</p>
-                                                                    <p className="text-gray-600">{course.smallDescription}</p>
+                                                                    <h2 className="text-xl font-bold">{courseDetails?.topicOne}</h2>
+                                                                    <p className="text-muted-foreground">{courseDetails?.topicTwo}</p>
+                                                                    <p className="text-gray-600">{courseDetails?.fullDescription}</p>
+                                                                    <p className="text-gray-600">{courseDetails?.smallDescription}</p>
                                                                     <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                                                                        <div><strong>Lessons:</strong> {course.lessonsQuantity}</div>
-                                                                        <div><strong>Duration:</strong> {course.duration}</div>
-                                                                        <div><strong>Price:</strong> ${course.price}</div>
+                                                                        <div><strong>Lessons:</strong> {courseDetails?.lessonsQuantity}</div>
+                                                                        <div><strong>Duration:</strong> {courseDetails?.duration}</div>
+                                                                        <div><strong>Price:</strong> ${courseDetails?.price}</div>
                                                                     </div>
                                                                 </div>
                                                             ) : (
@@ -327,9 +439,22 @@ export default function CoursesPage()
                                                             </DialogFooter>
                                                         </DialogContent>
                                                     </Dialog>
-                                                    <Button variant="ghost" size="icon" className="text-red-500" >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="text-red-500"> <Trash2 className="w-4 h-4" onClick={() => setCourseId(course._id)} /></Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[425px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Delete Confirmation</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Are You Sure ?
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <DialogFooter>
+                                                                <Button className="bg-red-500 hover:bg-red-500" onClick={handleDelete}>Delete</Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             </div>
                                         </div>
