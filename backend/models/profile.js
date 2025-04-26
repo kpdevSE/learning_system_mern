@@ -7,12 +7,7 @@ const teacherProfile = new mongoose.Schema(
             require: [true, 'Name is required'],
             trim: true
         },
-        workingEmail: {
-            type: String,
-            require: [true, "Please provide a Email"],
-            unique: true,
-            lowercase: true
-        },
+        lecturerEmail: { type: String, required: true },
         spcialization: {
             type: String,
             require: [true, "Please give a feild"]

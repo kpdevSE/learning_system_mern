@@ -13,20 +13,21 @@ export default function ProfilePage()
 {
 
     const [name, setName] = useState();
-    const [workingeEmail, setWorkingEmail] = useState();
     const [bio, setBio] = useState();
     const [spcialization, setSpcialization] = useState();
     const [department, setDepartment] = useState();
-    const [user, setUser] = useState([])
+    const [user, setUser] = useState({})
     const [loggedUser, setLoggedUser] = useState({})
     const [loading, setLoading] = useState(false);
+
+    console.log(loggedUser.email)
 
     const handleSubmit = async (e) =>
     {
         e.preventDefault();
         const payload = {
             name,
-            workingeEmail,
+            lecturerEmail: loggedUser.email,
             bio,
             spcialization,
             department,
@@ -67,8 +68,9 @@ export default function ProfilePage()
 
                 });
 
-
                 setUser(response.data.data);
+                console.log(response.data.data)
+
                 console.log(response.data.data)
             } catch (err)
             {
@@ -137,30 +139,24 @@ export default function ProfilePage()
                                         <CardDescription>{loggedUser?.email}</CardDescription>
                                     </div>
                                 </CardHeader>
-                                {user.length > 0 ? (
-                                    user.map((e) =>
-                                    {
-                                        return (
-
-                                            <CardContent className="space-y-4" key={e._id}>
-                                                <div>
-                                                    <h3 className="font-medium text-gray-500">Department</h3>
-                                                    <p>{user.department}</p>
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-medium text-gray-500">Specialization</h3>
-                                                    <p>{user.spcialization}</p>
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-medium text-gray-500">Bio</h3>
-                                                    <p className="text-gray-700">{user.bio}</p>
-                                                </div>
-                                            </CardContent>
-                                        )
-                                    })
+                                {user ? (
+                                    <CardContent className="space-y-4">
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Department</h3>
+                                            <p>{user.department}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Specialization</h3>
+                                            <p>{user.spcialization}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Bio</h3>
+                                            <p className="text-gray-700">{user.bio}</p>
+                                        </div>
+                                    </CardContent>
                                 ) : (
-                                    <div>
-                                        <p>No Users Found .. Please Log In</p>
+                                    <div className="font-semibold text-xl text-red-500 text-center">
+                                        <p>Please Navigate to Profile Edit tab and Update Your Profile </p>
                                     </div>
                                 )}
 

@@ -4,12 +4,12 @@ exports.addprofile = async (req, res) =>
 {
     try
     {
-        const { name, workingEmail, spcialization, bio, department } = req.body;
+        const { name, lecturerEmail, spcialization, bio, department } = req.body;
 
         const teacherProfile = await TeacherProfile.create(
             {
                 name,
-                workingEmail,
+                lecturerEmail,
                 spcialization,
                 bio,
                 department
@@ -38,7 +38,9 @@ exports.getteacherProfile = async (req, res) =>
 {
     try
     {
-        const user = await TeacherProfile.find()
+
+        const email = req.user.email;
+        const user = await TeacherProfile.findOne({ lecturerEmail: email });
 
         res.status(200).json(
             {
