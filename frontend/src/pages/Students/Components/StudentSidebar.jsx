@@ -44,24 +44,24 @@ export default function StudentSidebar()
 
 
 
-    useEffect(() =>
-    {
-        const fetchUser = async () =>
-        {
-            try
-            {
-                const token = localStorage.getItem('token');
-                if (!token) return;
+    // useEffect(() =>
+    // {
+    //     const fetchUser = async () =>
+    //     {
+    //         try
+    //         {
+    //             const token = localStorage.getItem('token');
+    //             if (!token) return;
 
 
-                setUser(response.data.data);
-            } catch (err)
-            {
-                console.error('Error fetching user:', err);
-            }
-        };
-        fetchUser();
-    }, [])
+    //             setUser(response.data.data);
+    //         } catch (err)
+    //         {
+    //             console.error('Error fetching user:', err);
+    //         }
+    //     };
+    //     fetchUser();
+    // }, [])
 
     useEffect(() =>
     {
