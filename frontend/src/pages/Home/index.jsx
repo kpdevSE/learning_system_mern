@@ -98,10 +98,10 @@ export default function LMSLandingPage()
                                 Join millions of learners worldwide and transform your career with our comprehensive learning platform.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <a href="#" className="bg-violet-600 text-white hover:bg-violet-700 px-6 py-3 rounded-md text-base font-medium flex items-center justify-center">
+                                <a href="#" className="bg-black text-white hover:bg-black px-6 py-3 rounded-md text-base font-medium flex items-center justify-center">
                                     Get Started For Free <ArrowRight className="ml-2 h-4 w-4" />
                                 </a>
-                                <a href="#" className="bg-white text-violet-700 border border-violet-600 hover:bg-violet-50 px-6 py-3 rounded-md text-base font-medium flex items-center justify-center">
+                                <a href="#" className="bg-white text-black border border-black hover:bg-violet-50 px-6 py-3 rounded-md text-base font-medium flex items-center justify-center">
                                     Browse Courses
                                 </a>
                             </div>
@@ -137,7 +137,7 @@ export default function LMSLandingPage()
                             <div key={course.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                                 <img src={course.image} alt={course.title} className="w-full h-48 object-cover" />
                                 <div className="p-5">
-                                    <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-700 mb-3">{course.category}</span>
+                                    <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-violet-100 text-black mb-3">{course.category}</span>
                                     <h3 className="font-semibold text-lg mb-2">{course.title}</h3>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center">
@@ -146,7 +146,7 @@ export default function LMSLandingPage()
                                         </div>
                                         <span className="text-sm text-gray-500">{course.students} students</span>
                                     </div>
-                                    <a href="#" className="block text-center bg-white text-violet-700 border border-violet-600 hover:bg-violet-50 px-4 py-2 rounded-md text-sm font-medium">
+                                    <a href="#" className="block text-center bg-white font-semibold text-black border border-black hover:bg-violet-50 px-4 py-2 rounded-md text-sm ">
                                         Learn More
                                     </a>
                                 </div>
@@ -154,7 +154,7 @@ export default function LMSLandingPage()
                         ))}
                     </div>
                     <div className="mt-10 text-center">
-                        <a href="#" className="inline-flex items-center text-violet-700 hover:text-violet-800 font-medium">
+                        <a href="#" className="inline-flex items-center text-black hover:black font-medium">
                             View all courses <ArrowRight className="ml-2 h-4 w-4" />
                         </a>
                     </div>
@@ -213,14 +213,14 @@ export default function LMSLandingPage()
             </section>
 
             {/* CTA */}
-            <section className="py-12 bg-violet-700">
+            <section className="py-12 bg-black">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl font-bold text-white mb-6">Ready to Start Your Learning Journey?</h2>
                     <p className="text-xl text-violet-100 mb-8 max-w-3xl mx-auto">
                         Join thousands of students who are already advancing their careers with LearnHub.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <a href="#" className="bg-white text-violet-700 hover:bg-gray-100 px-6 py-3 rounded-md text-base font-medium inline-flex items-center justify-center">
+                        <a href="#" className="bg-white text-black hover:bg-gray-100 px-6 py-3 rounded-md text-base font-medium inline-flex items-center justify-center">
                             Sign Up Free <ArrowRight className="ml-2 h-4 w-4" />
                         </a>
                         <a href="#" className="bg-transparent text-white border border-white hover:bg-violet-600 px-6 py-3 rounded-md text-base font-medium inline-flex items-center justify-center">

@@ -33,12 +33,6 @@ const Navbar = () =>
         { name: 'Contact Us', path: '/contact' },
     ];
 
-    const courseLinks = [
-        { name: 'General English', path: '/courses/general-english' },
-        { name: 'Business English', path: '/courses/business-english' },
-        { name: 'IELTS Preparation', path: '/courses/ielts-preparation' },
-        { name: 'Conversational English', path: '/courses/conversational-english' },
-    ];
 
     return (
         <nav className="bg-white shadow-md">
@@ -47,7 +41,7 @@ const Navbar = () =>
                     {/* Logo */}
                     <div className="flex-shrink-0">
                         <Link to="/" className="flex items-center">
-                            <span className="text-2xl font-bold text-purple-600">English Learning</span>
+                            <span className="text-2xl font-bold text-black">English Learning</span>
                         </Link>
                     </div>
 
@@ -58,8 +52,8 @@ const Navbar = () =>
                                 key={link.path}
                                 to={link.path}
                                 className={`px-3 py-2 rounded-md text-sm font-medium ${isActive(link.path)
-                                    ? 'text-purple-600 bg-blue-50'
-                                    : 'text-gray-700 hover:text-purple-600 hover:bg-blue-50'
+                                    ? 'text-black bg-blue-50'
+                                    : 'text-gray-700 hover:text-black hover:bg-blue-50'
                                     }`}
                             >
                                 {link.name}
@@ -67,42 +61,20 @@ const Navbar = () =>
                         ))}
 
                         {/* Courses Dropdown */}
-                        <div className="relative">
-                            <button
-                                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-blue-50 flex items-center"
-                                onClick={toggleCoursesMenu}
-                            >
-                                Courses <ChevronDown className="ml-1 h-4 w-4" />
-                            </button>
 
-                            {isCoursesOpen && (
-                                <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-10">
-                                    {courseLinks.map((course) => (
-                                        <Link
-                                            key={course.path}
-                                            to={course.path}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-purple-600"
-                                            onClick={() => setIsCoursesOpen(false)}
-                                        >
-                                            {course.name}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                     {/* Auth Buttons */}
                     <div className="hidden md:flex items-center space-x-4">
                         <LoginComponent />
-                        <RegisterComponent />
+
                     </div>
 
                     {/* Mobile menu button */}
                     <div className="md:hidden flex items-center">
                         <button
                             onClick={toggleMenu}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-purple-600 hover:bg-blue-50 focus:outline-none"
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:black hover:bg-blue-50 focus:outline-none"
                         >
                             {isOpen ? (
                                 <X className="block h-6 w-6" aria-hidden="true" />
@@ -124,7 +96,7 @@ const Navbar = () =>
                                 to={link.path}
                                 className={`block px-3 py-2 rounded-md text-base font-medium ${isActive(link.path)
                                     ? 'text-blue-600 bg-blue-50'
-                                    : 'text-gray-700 hover:text-purple-600 hover:bg-blue-50'
+                                    : 'text-gray-700 hover:text-black hover:bg-blue-50'
                                     }`}
                                 onClick={() => setIsOpen(false)}
                             >
@@ -135,7 +107,7 @@ const Navbar = () =>
                         {/* Mobile Courses Dropdown */}
                         <div>
                             <button
-                                className="flex items-center justify-between w-full px-3 py-2 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-blue-50 rounded-md"
+                                className="flex items-center justify-between w-full px-3 py-2 text-base font-medium text-gray-700 hover:text-black hover:bg-blue-50 rounded-md"
                                 onClick={toggleCoursesMenu}
                             >
                                 Courses
@@ -148,7 +120,7 @@ const Navbar = () =>
                                         <Link
                                             key={course.path}
                                             to={course.path}
-                                            className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-blue-50 rounded-md"
+                                            className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-black hover:bg-blue-50 rounded-md"
                                             onClick={() =>
                                             {
                                                 setIsCoursesOpen(false);
@@ -166,7 +138,7 @@ const Navbar = () =>
                     <div className="pt-4 pb-3 border-t border-gray-200">
                         <div className="flex items-center px-5">
                             <div className="flex-shrink-0">
-                                <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold">
+                                <div className="h-10 w-10 rounded-full bg-black flex items-center justify-center text-white font-semibold">
                                     G
                                 </div>
                             </div>
@@ -178,7 +150,7 @@ const Navbar = () =>
                         <div className="mt-3 px-2 space-y-1">
                             <Link
                                 to="/login"
-                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-blue-50"
+                                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:black hover:bg-blue-50"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Log In

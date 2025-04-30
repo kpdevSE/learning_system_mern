@@ -146,7 +146,7 @@ export default function RegisterComponent()
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">Sign In</Button>
+                <Button className="cursor-pointer">Sign In</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>

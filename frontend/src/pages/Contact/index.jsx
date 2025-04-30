@@ -50,7 +50,7 @@ export default function ContactPage()
                 <div className="max-w-7xl mx-auto">
                     {/* Back to Homepage link */}
                     <div className="mb-8">
-                        <a href="/" className="inline-flex items-center text-violet-600 hover:text-violet-800 font-medium">
+                        <a href="/" className="inline-flex items-center text-black hover:text-black font-medium">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Homepage
                         </a>
@@ -60,7 +60,7 @@ export default function ContactPage()
                     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                         <div className="lg:flex">
                             {/* Contact Info Section */}
-                            <div className="lg:w-1/3 bg-violet-700 text-white p-8 lg:p-12">
+                            <div className="lg:w-1/3 bg-black text-white p-8 lg:p-12">
                                 <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
                                 <p className="mb-8 text-violet-100">
                                     Have questions or need assistance? Our team is here to help you with any inquiries about our courses or platform.
@@ -107,19 +107,19 @@ export default function ContactPage()
                                 <div className="mt-12">
                                     <h3 className="text-lg font-medium mb-4">Follow Us</h3>
                                     <div className="flex space-x-4">
-                                        <a href="#" className="bg-violet-600 hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
+                                        <a href="#" className="bg-black hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
                                             <span className="sr-only">Facebook</span>
                                             <div className="h-5 w-5 bg-violet-300 rounded-sm flex items-center justify-center"><Facebook className='text-black' /></div>
                                         </a>
-                                        <a href="#" className="bg-violet-600 hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
+                                        <a href="#" className="bg-black hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
                                             <span className="sr-only">Twitter</span>
                                             <div className="h-5 w-5 bg-violet-300 rounded-sm flex items-center justify-center"><Twitter className='text-black' /></div>
                                         </a>
-                                        <a href="#" className="bg-violet-600 hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
+                                        <a href="#" className="bg-black hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
                                             <span className="sr-only">LinkedIn</span>
                                             <div className="h-5 w-5 bg-violet-300 rounded-sm flex items-center justify-center"><Linkedin className='text-black' /></div>
                                         </a>
-                                        <a href="#" className="bg-violet-600 hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
+                                        <a href="#" className="bg-black hover:bg-violet-500 h-10 w-10 rounded-full flex items-center justify-center">
                                             <span className="sr-only">Instagram</span>
                                             <div className="h-5 w-5 bg-violet-300 rounded-sm flex items-center justify-center"><Instagram className='text-black' /></div>
                                         </a>
@@ -211,10 +211,10 @@ export default function ContactPage()
                                                 <input
                                                     type="checkbox"
                                                     required
-                                                    className="h-4 w-4 text-violet-600 focus:ring-violet-500 border-gray-300 rounded"
+                                                    className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
                                                 />
                                                 <span className="ml-2 text-sm text-gray-600">
-                                                    I agree to the <a href="#" className="text-violet-600 hover:text-violet-800">Privacy Policy</a> and consent to be contacted regarding my inquiry.
+                                                    I agree to the <a href="#" className="text-black hover:text-black">Privacy Policy</a> and consent to be contacted regarding my inquiry.
                                                 </span>
                                             </label>
                                         </div>
@@ -222,7 +222,7 @@ export default function ContactPage()
                                         <div>
                                             <button
                                                 type="submit"
-                                                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                                                className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
                                             >
                                                 <Send className="h-5 w-5 mr-2" />
                                                 Send Message

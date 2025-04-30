@@ -16,22 +16,22 @@ export default function AboutPage()
 
     const values = [
         {
-            icon: <Award className="h-8 w-8 text-violet-600" />,
+            icon: <Award className="h-8 w-8 text-black" />,
             title: "Excellence",
             description: "We are committed to providing the highest quality educational content and learning experiences to help our students achieve their full potential."
         },
         {
-            icon: <Globe className="h-8 w-8 text-violet-600" />,
+            icon: <Globe className="h-8 w-8 text-black" />,
             title: "Accessibility",
             description: "We believe that education should be accessible to everyone, regardless of their location, background, or financial situation."
         },
         {
-            icon: <Users className="h-8 w-8 text-violet-600" />,
+            icon: <Users className="h-8 w-8 text-black" />,
             title: "Community",
             description: "We foster a supportive community where students and instructors can connect, collaborate, and grow together."
         },
         {
-            icon: <Target className="h-8 w-8 text-violet-600" />,
+            icon: <Target className="h-8 w-8 text-black" />,
             title: "Innovation",
             description: "We continuously strive to innovate and improve our platform to meet the evolving needs of our learners and the changing demands of the job market."
         }
@@ -98,7 +98,7 @@ export default function AboutPage()
             <div className="max-w-7xl mx-auto">
                 {/* Back to Homepage link */}
                 <div className="mb-8">
-                    <a href="/" className="inline-flex items-center text-violet-600 hover:text-violet-800 font-medium">
+                    <a href="/" className="inline-flex items-center text-black hover:text-black font-medium">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Homepage
                     </a>
@@ -138,7 +138,7 @@ export default function AboutPage()
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 my-16">
                             {stats.map((stat, index) => (
                                 <div key={index} className="text-center">
-                                    <p className="text-3xl font-bold text-violet-600">{stat.value}</p>
+                                    <p className="text-3xl font-bold text-black">{stat.value}</p>
                                     <p className="text-gray-600 mt-1">{stat.label}</p>
                                 </div>
                             ))}
@@ -170,7 +170,7 @@ export default function AboutPage()
                                             <img src={member.image} alt={member.name} className="h-full w-full object-cover" />
                                         </div>
                                         <h3 className="text-xl font-semibold text-gray-900">{member.name}</h3>
-                                        <p className="text-violet-600 font-medium mb-3">{member.role}</p>
+                                        <p className="text-black font-medium mb-3">{member.role}</p>
                                         <p className="text-gray-600 text-sm">{member.bio}</p>
                                     </div>
                                 ))}
@@ -188,14 +188,14 @@ export default function AboutPage()
                                     {milestones.map((milestone, index) => (
                                         <div key={index} className={`relative sm:flex ${index % 2 === 0 ? 'sm:flex-row' : 'sm:flex-row-reverse'}`}>
                                             {/* Year marker */}
-                                            <div className="hidden sm:flex sm:items-center sm:justify-center sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 w-12 h-12 rounded-full bg-violet-600 text-white font-bold">
+                                            <div className="hidden sm:flex sm:items-center sm:justify-center sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 w-12 h-12 rounded-full bg-black text-white font-bold">
                                                 {milestone.year}
                                             </div>
 
                                             {/* Content */}
                                             <div className={`sm:w-1/2 ${index % 2 === 0 ? 'sm:pr-16' : 'sm:pl-16'} sm:text-${index % 2 === 0 ? 'right' : 'left'}`}>
                                                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                                                    <span className="sm:hidden inline-block px-3 py-1 bg-violet-600 text-white text-sm font-bold rounded-full mb-2">
+                                                    <span className="sm:hidden inline-block px-3 py-1 bg-black text-white text-sm font-bold rounded-full mb-2">
                                                         {milestone.year}
                                                     </span>
                                                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{milestone.title}</h3>
@@ -230,7 +230,7 @@ export default function AboutPage()
                                             "Personalized learning paths tailored to individual goals"
                                         ].map((item, index) => (
                                             <div key={index} className="flex items-start">
-                                                <Check className="h-6 w-6 text-violet-600 flex-shrink-0 mt-0.5" />
+                                                <Check className="h-6 w-6 text-black flex-shrink-0 mt-0.5" />
                                                 <p className="ml-3 text-gray-700">{item}</p>
                                             </div>
                                         ))}
@@ -246,10 +246,10 @@ export default function AboutPage()
                                 Ready to start your learning journey with us? Create an account today and join thousands of learners worldwide.
                             </p>
                             <div className="inline-flex space-x-4">
-                                <a href="/signup" className="bg-violet-600 hover:bg-violet-700 text-white px-8 py-3 rounded-md font-medium">
+                                <a href="/signup" className="bg-black hover:bg-black text-white px-8 py-3 rounded-md font-medium">
                                     Sign Up Free
                                 </a>
-                                <a href="/contact" className="bg-white border border-violet-600 text-violet-600 hover:bg-violet-50 px-8 py-3 rounded-md font-medium">
+                                <a href="/contact" className="bg-white border border-black text-black hover:bg-violet-50 px-8 py-3 rounded-md font-medium">
                                     Contact Us
                                 </a>
                             </div>
