@@ -217,7 +217,6 @@ export default function CoursesPage()
             {
 
                 toast.success("Course deleted successfully!");
-                onCourseDeleted(courseId);
                 window.location.reload()
             }
         } catch (error)
@@ -441,7 +440,7 @@ export default function CoursesPage()
                                                     </Dialog>
                                                     <Dialog>
                                                         <DialogTrigger asChild>
-                                                            <Button variant="ghost" size="icon" className="text-red-500"> <Trash2 className="w-4 h-4" onClick={() => setCourseId(course._id)} /></Button>
+                                                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => setCourseId(course._id)}> <Trash2 className="w-4 h-4" /></Button>
                                                         </DialogTrigger>
                                                         <DialogContent className="sm:max-w-[425px]">
                                                             <DialogHeader>
