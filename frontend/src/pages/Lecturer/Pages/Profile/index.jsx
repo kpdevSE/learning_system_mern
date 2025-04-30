@@ -20,28 +20,54 @@ export default function ProfilePage()
     const [loggedUser, setLoggedUser] = useState({})
     const [loading, setLoading] = useState(false);
 
+    const [profileImage, setProfileImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+
+    // Handle image selection
+    const handleImageChange = (e) =>
+    {
+        const file = e.target.files[0];
+
+        if (file)
+        {
+            setProfileImage(file);
+            console.log(file)
+
+            // Create preview URL
+            const reader = new FileReader();
+            reader.onloadend = () =>
+            {
+                setImagePreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
+
     console.log(loggedUser.email)
 
     const handleSubmit = async (e) =>
     {
         e.preventDefault();
-        const payload = {
-            name,
-            lecturerEmail: loggedUser.email,
-            bio,
-            spcialization,
-            department,
-        };
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('lecturerEmail', loggedUser.email);
+        formData.append('bio', bio);
+        formData.append('spcialization', spcialization);
+        formData.append('department', department);
+        formData.append('profileImage', profileImage); // This is the actual File object
 
         try
         {
+            setLoading(true);
             const token = localStorage.getItem('token');
-            console.log('Token:', token);
-            const response = await axios.post('http://localhost:5000/api/users/profile', payload, {
+            const response = await axios.post('http://localhost:5000/api/users/profile', formData, {
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
             });
             console.log('Profile updated:', response.data);
             toast.success("Profile updated successfully");
@@ -49,8 +75,12 @@ export default function ProfilePage()
         {
             console.error('Error updating profile:', error);
             toast.error("Something went wrong");
+        } finally
+        {
+            setLoading(false);
         }
     };
+
 
     useEffect(() =>
     {
@@ -131,8 +161,15 @@ export default function ProfilePage()
                             <Card>
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <Avatar className="h-16 w-16">
-                                        <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
-                                        <AvatarFallback>JS</AvatarFallback>
+                                        {user && user.profileImage ? (
+                                            <AvatarImage
+                                                src={`http://localhost:5000${user.profileImage}`}
+                                                alt={user.name || "Profile"}
+                                            />
+                                        ) : (
+                                            <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
+                                        )}
+                                        <AvatarFallback>{loggedUser?.name?.charAt(0) || "U"}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <CardTitle className="text-2xl">{loggedUser?.name}</CardTitle>
@@ -170,8 +207,7 @@ export default function ProfilePage()
                                     <CardDescription>Make changes to your profile information</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <form action="" onSubmit={handleSubmit}>
-
+                                    <form onSubmit={handleSubmit}>
                                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                             <div className="space-y-2">
                                                 <Label htmlFor="name">Name</Label>
@@ -179,25 +215,16 @@ export default function ProfilePage()
                                                     id="name"
                                                     name="name"
                                                     value={name}
-                                                    onChange={(e) =>
-                                                    {
-                                                        setName(e.target.value)
-                                                    }
-                                                    }
+                                                    onChange={(e) => setName(e.target.value)}
                                                 />
                                             </div>
-
                                             <div className="space-y-2">
                                                 <Label htmlFor="department">Department</Label>
                                                 <Input
                                                     id="department"
                                                     name="department"
                                                     value={department}
-                                                    onChange={(e) =>
-                                                    {
-                                                        setDepartment(e.target.value)
-                                                    }
-                                                    }
+                                                    onChange={(e) => setDepartment(e.target.value)}
                                                 />
                                             </div>
                                             <div className="space-y-2">
@@ -206,31 +233,57 @@ export default function ProfilePage()
                                                     id="specialization"
                                                     name="specialization"
                                                     value={spcialization}
-                                                    onChange={(e) =>
-                                                    {
-                                                        setSpcialization(e.target.value)
-                                                    }
-                                                    }
+                                                    onChange={(e) => setSpcialization(e.target.value)}
                                                 />
                                             </div>
+
+                                            {/* Image Upload Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="profileImage">Profile Image</Label>
+                                                <Input
+                                                    id="profileImage"
+                                                    name="profileImage"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                />
+
+                                                {/* Image Preview */}
+                                                {imagePreview && (
+                                                    <div className="mt-2">
+                                                        <p className="text-sm text-gray-500 mb-1">Preview:</p>
+                                                        <div className="w-24 h-24 rounded-full overflow-hidden border">
+                                                            <img
+                                                                src={imagePreview}
+                                                                alt="Profile Preview"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
+
+                                        <div className="space-y-2 mt-4">
                                             <Label htmlFor="bio">Bio</Label>
                                             <textarea
                                                 id="bio"
                                                 name="bio"
                                                 className="w-full min-h-24 p-2 border rounded-md"
                                                 value={bio}
-                                                onChange={(e) =>
-                                                {
-                                                    setBio(e.target.value)
-                                                }
-                                                }
+                                                onChange={(e) => setBio(e.target.value)}
                                             />
                                         </div>
-                                        <div className="flex justify-end space-x-2">
-                                            <Button variant="outline">Cancel</Button>
-                                            <Button className="bg-black hover:bg-black" type="submit">Save Changes</Button>
+
+                                        <div className="flex justify-end space-x-2 mt-4">
+                                            <Button variant="outline" type="button">Cancel</Button>
+                                            <Button
+                                                className="bg-black hover:bg-black"
+                                                type="submit"
+                                                disabled={loading}
+                                            >
+                                                {loading ? "Saving..." : "Save Changes"}
+                                            </Button>
                                         </div>
                                     </form>
                                 </CardContent>

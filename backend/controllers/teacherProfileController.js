@@ -1,38 +1,69 @@
 const TeacherProfile = require('../models/profile');
+const upload = require('../config/multerConfig')
+const multer = require('multer');
 
-exports.addprofile = async (req, res) =>
+
+const uploadProfileImage = upload.single('profileImage');
+
+exports.addProfile = async (req, res) =>
 {
     try
     {
-        const { name, lecturerEmail, spcialization, bio, department } = req.body;
-
-        const teacherProfile = await TeacherProfile.create(
+        // Use multer middleware for file upload
+        uploadProfileImage(req, res, async function (err)
+        {
+            if (err instanceof multer.MulterError)
             {
+                // A Multer error occurred when uploading
+                return res.status(400).json({
+                    message: `Image upload error: ${err.message}`,
+                    success: false
+                });
+            } else if (err)
+            {
+                // An unknown error occurred
+                return res.status(400).json({
+                    message: `Error: ${err.message}`,
+                    success: false
+                });
+            }
+
+            // Get form data
+            const { name, lecturerEmail, spcialization, bio, department } = req.body;
+
+            // Create profile data object
+            const profileData = {
                 name,
                 lecturerEmail,
                 spcialization,
                 bio,
                 department
-            }
-        );
+            };
 
-        res.status(200).json(
+            // Add profile image path if file was uploaded
+            if (req.file)
             {
-                message: "Profile details addedd successfuly",
+                profileData.profileImage = `/uploads/profile-images/${req.file.filename}`;
+            }
+
+            // Create teacher profile
+            const teacherProfile = await TeacherProfile.create(profileData);
+
+            res.status(200).json({
+                message: "Profile details added successfully",
                 success: true,
                 data: teacherProfile
-            }
-        )
+            });
+        });
     } catch (error)
     {
-        console.error('Registration error:', error);
-        res.status(500).json(
-            {
-                message: 'Server error', error: error.message
-            }
-        );
+        console.error('Profile creation error:', error);
+        res.status(500).json({
+            message: 'Server error',
+            error: error.message
+        });
     }
-}
+};
 
 exports.getteacherProfile = async (req, res) => 
 {

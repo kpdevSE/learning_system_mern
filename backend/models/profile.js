@@ -19,6 +19,10 @@ const teacherProfile = new mongoose.Schema(
         department: {
             type: String,
             require: [true, "Department is required"]
+        },
+        profileImage: {
+            type: String,
+            default: ""
         }
     }, {
     timestamps: true
