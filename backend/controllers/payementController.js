@@ -77,3 +77,26 @@ exports.getAllCoursesByPurchasingEmail = async (req, res) =>
         res.status(500).json({ success: false, message: err.message });
     }
 }
+
+// Get Payments Couunt
+exports.getPayementCountToLecturer = async (req, res) =>
+{
+    try
+    {
+        const email = req.user.email;
+        const payement = await Payement.find({ loggedUserEmail: email });
+
+        console.log(payement)
+
+        res.status(200).json(
+            {
+                message: "Payements get successfully",
+                data: payement
+            }
+        )
+
+    } catch (error)
+    {
+        res.status(500).json({ success: false, message: err.message });
+    }
+}

@@ -9,16 +9,17 @@ import ReactPlayer from 'react-player'
 
 export default function Example({ youtubeUrl, topicOne, topicTwo, savedLecturerEmail, savedFullDescription, savedQuantity, savedDuration, savedSmallDescription })
 {
-    const [open, setOpen] = useState(true)
+    const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
 
     return (
         <div className='mt-8'>
-            <Button onClick={() =>
-            {
-                setOpen(true)
-            }
-            }>
+            <Button onClick=
+                {() =>
+                {
+                    setOpen(true)
+                }
+                }>
                 <PlayCircleIcon className="mr-2" />
                 Watch Here
             </Button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StudentSidebar from "../../Components/StudentSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,7 @@ import
     TrendingUp,
     CircleAlert
 } from "lucide-react";
+import axios from "axios";
 
 export default function Payment()
 {
@@ -146,6 +147,35 @@ export default function Payment()
         setNewPaymentDialogOpen(false);
     };
 
+    const [payement, setPayemeny] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+
+    useEffect(() =>
+    {
+        const fetchStudentCount = async () =>
+        {
+            const token = localStorage.getItem('token');
+            try
+            {
+                setLoading(true)
+                const response = await axios.get('http://localhost:5000/api/users/countofpayement', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPayemeny(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching student count:', err);
+            }
+            setLoading(false)
+        };
+
+        fetchStudentCount();
+    }, []);
+
     // Status badge renderer
     const renderStatusBadge = (status) =>
     {
@@ -196,57 +226,12 @@ export default function Payment()
                 </div>
 
                 {/* Payment Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Total Paid</CardTitle>
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">${totalPaid.toFixed(2)}</div>
-                            <p className="text-xs text-muted-foreground">Current academic year</p>
-                        </CardContent>
-                    </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">${pendingAmount.toFixed(2)}</div>
-                            <p className="text-xs text-muted-foreground">{pendingPayments.length} pending invoices</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Next Payment</CardTitle>
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">${pendingPayments[0]?.amount.toFixed(2) || "0.00"}</div>
-                            <p className="text-xs text-muted-foreground">Due on {pendingPayments[0]?.dueDate || "N/A"}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Available Credit</CardTitle>
-                            <BadgePercent className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">$250.00</div>
-                            <p className="text-xs text-muted-foreground">Academic achievement bonus</p>
-                        </CardContent>
-                    </Card>
-                </div>
 
                 <Tabs defaultValue="history" className="mb-6" onValueChange={setActiveTab}>
                     <TabsList>
                         <TabsTrigger value="history">Payment History</TabsTrigger>
-                        <TabsTrigger value="pending">Pending Payments</TabsTrigger>
-                        <TabsTrigger value="methods">Payment Methods</TabsTrigger>
+
                     </TabsList>
 
                     <TabsContent value="history">
@@ -255,29 +240,7 @@ export default function Payment()
                                 <CardTitle>Transaction History</CardTitle>
                                 <CardDescription>View all your payment transactions</CardDescription>
 
-                                <div className="flex flex-col sm:flex-row gap-4 mt-4">
-                                    <div className="relative flex-1">
-                                        <SearchIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search by description or ID..."
-                                            className="pl-10"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
 
-                                    <Select value={filterStatus} onValueChange={setFilterStatus}>
-                                        <SelectTrigger className="w-full sm:w-[180px]">
-                                            <SelectValue placeholder="Filter by status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Statuses</SelectItem>
-                                            <SelectItem value="completed">Completed</SelectItem>
-                                            <SelectItem value="processing">Processing</SelectItem>
-                                            <SelectItem value="failed">Failed</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                             </CardHeader>
 
                             <CardContent>
@@ -294,25 +257,28 @@ export default function Payment()
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {filteredPayments.map(payment => (
-                                            <TableRow key={payment.id}>
-                                                <TableCell className="font-medium">{payment.id}</TableCell>
-                                                <TableCell>{payment.date}</TableCell>
-                                                <TableCell>{payment.description}</TableCell>
-                                                <TableCell>${payment.amount.toFixed(2)}</TableCell>
-                                                <TableCell>{payment.method}</TableCell>
-                                                <TableCell>{renderStatusBadge(payment.status)}</TableCell>
+                                        {payement.map(payment => (
+                                            <TableRow key={payment._id}>
+                                                <TableCell className="font-medium">{payment._id}</TableCell>
+                                                <TableCell>{new Date(payment.createdAt).toLocaleString('en-US', {
+                                                    dateStyle: 'medium',
+                                                    timeStyle: 'short',
+                                                })}</TableCell>
+                                                <TableCell>{payment.savedSmallDescription}</TableCell>
+                                                <TableCell>Rs.{payment.savedPrice}</TableCell>
+                                                <TableCell>Online</TableCell>
+                                                <TableCell><div className="bg-green-300 text-green-800 font-semibold rounded-lg flex items-center text-center justify-center">completed</div></TableCell>
                                                 <TableCell className="text-right">
-                                                    {payment.receipt && (
-                                                        <Button variant="ghost" size="sm">
-                                                            <Download className="h-4 w-4 mr-1" /> Receipt
-                                                        </Button>
-                                                    )}
+                                                    {/* {payment.receipt && ( */}
+                                                    <Button variant="ghost" size="sm">
+                                                        <Download className="h-4 w-4 mr-1" /> Receipt
+                                                    </Button>
+                                                    {/* )} */}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
 
-                                        {filteredPayments.length === 0 && (
+                                        {payement.length === 0 && (
                                             <TableRow>
                                                 <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                                                     No payment records found

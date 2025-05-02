@@ -5,7 +5,7 @@ const { protect } = require('../middleware/auth');
 const { getteacherProfile, addProfile } = require('../controllers/teacherProfileController');
 const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents, getCoursesCount } = require('../controllers/courseController');
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
-const { makePayment, getAllCoursesByPurchasingEmail } = require('../controllers/payementController');
+const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer } = require('../controllers/payementController');
 
 
 // Protected routes
@@ -33,6 +33,7 @@ router.get('/coursecount/count', getCoursesCount)
 // Payement
 router.post('/payement', makePayment)
 router.get('/purchased/courses', getAllCoursesByPurchasingEmail)
+router.get('/countofpayement', getPayementCountToLecturer)
 
 
 module.exports = router;

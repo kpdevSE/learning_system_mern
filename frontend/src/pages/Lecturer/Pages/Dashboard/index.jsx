@@ -3,7 +3,7 @@ import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, DollarSign, Star, Clock, LoaderIcon } from "lucide-react";
+import { Calendar, Users, DollarSign, Star, Clock, LoaderIcon, IndianRupee } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -51,6 +51,34 @@ export default function LecturerDashboard()
     }, []);
 
 
+    const [paymentCount, setPayementCount] = useState([]);
+
+    useEffect(() =>
+    {
+        const fetchPayementCount = async () =>
+        {
+            const token = localStorage.getItem('token');
+            try
+            {
+                setLoading(true)
+                const response = await axios.get('http://localhost:5000/api/users/countofpayement', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setPayementCount(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching Payement count:', err);
+            }
+            setLoading(false)
+        };
+
+        fetchPayementCount();
+    }, []);
+
+
     return (
         <div className="flex min-h-screen bg-slate-50">
             <LecturerSidebar />
@@ -90,11 +118,16 @@ export default function LecturerDashboard()
 
                         <Card>
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Earnings</CardTitle>
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Total Earnings</CardTitle>
                             </CardHeader>
                             <CardContent className="flex items-center justify-between">
-                                <span className="text-2xl font-bold">$1,240</span>
-                                <DollarSign className="h-5 w-5 text-muted-foreground" />
+
+
+
+                                <span className="text-2xl font-bold" >Rs . 56780</span>
+
+
+
                             </CardContent>
                         </Card>
 

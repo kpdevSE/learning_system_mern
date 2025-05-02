@@ -368,10 +368,7 @@ export default function Courses()
                                                 )}
 
                                                 <DialogFooter className="flex gap-2 mt-4">
-                                                    {!loading && courseDetails && (
-
-                                                        <PurchaseComponent loggedUser={user.email} price={courseDetails.price} lecturerEmail={courseDetails.lecturerEmail} duration={courseDetails.duration} quantity={courseDetails.lessonsQuantity} fullDescription={courseDetails.fullDescription} smallDescription={courseDetails.smallDescription} topicOne={courseDetails.topicOne} topicTwo={courseDetails.topicTwo} imageUrl={courseDetails.imageUrl} username={user.name} youtubeUrl={courseDetails.youtubeUrl} />
-                                                    )}
+                                                    <PurchaseComponent loggedUser={user.email} price={courseDetails.price} lecturerEmail={courseDetails.lecturerEmail} duration={courseDetails.duration} quantity={courseDetails.lessonsQuantity} fullDescription={courseDetails.fullDescription} smallDescription={courseDetails.smallDescription} topicOne={courseDetails.topicOne} topicTwo={courseDetails.topicTwo} imageUrl={courseDetails.imageUrl} username={user.name} youtubeUrl={courseDetails.youtubeUrl} />
                                                     <Button variant="outline" onClick={() => setOpen(false)}>
                                                         Close
                                                     </Button>

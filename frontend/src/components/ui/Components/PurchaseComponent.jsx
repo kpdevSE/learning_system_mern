@@ -42,19 +42,20 @@ export default function PurchaseComponent({ loggedUser, price, lecturerEmail, du
     const handlePayment = async (e) =>
     {
         e.preventDefault()
+
         const payload = {
-            loggedUserEmail,
-            savedPrice,
-            savedYoutubeUrl,
-            savedLecturerEmail,
-            savedDuration,
-            savedQuantity,
-            savedFullDescription,
-            savedSmallDescription,
-            savedTopicOne,
-            savedTopicTwo,
-            savedImageUrl,
-            savedUsername,
+            loggedUserEmail: loggedUser,
+            savedPrice: price,
+            savedYoutubeUrl: youtubeUrl,
+            savedLecturerEmail: lecturerEmail,
+            savedDuration: duration,
+            savedQuantity: quantity,
+            savedFullDescription: fullDescription,
+            savedSmallDescription: smallDescription,
+            savedTopicOne: topicOne,
+            savedTopicTwo: topicTwo,
+            savedImageUrl: imageUrl,
+            savedUsername: username,
             cardNumber,
             exDate,
             cvv,
