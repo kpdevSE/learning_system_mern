@@ -8,6 +8,7 @@ exports.createCourse = async (req, res) =>
         const {
             lecturerEmail,
             imageUrl,
+            youtubeUrl,
             topicOne,
             topicTwo,
             smallDescription,
@@ -19,6 +20,7 @@ exports.createCourse = async (req, res) =>
 
         const course = new Course({
             lecturerEmail,
+            youtubeUrl,
             imageUrl,
             topicOne,
             topicTwo,

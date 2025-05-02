@@ -14,6 +14,7 @@ export default function CoursesPage()
 {
 
     const [imageUrl, setImageUrl] = useState("");
+    const [youtubeUrl, setYoutubeUrl] = useState("")
     const [topicOne, setTopicOne] = useState("");
     const [topicTwo, setTopicTwo] = useState("");
     const [smallDescription, setSmallDescription] = useState("");
@@ -36,6 +37,7 @@ export default function CoursesPage()
         price: 0,
         duration: "",
         imageUrl: "",
+        youtubeUrl: ""
     });
 
     // Logged User email getting
@@ -104,6 +106,7 @@ export default function CoursesPage()
         const payload = {
             lecturerEmail: loggedUser.email,
             imageUrl,
+            youtubeUrl,
             topicOne,
             topicTwo,
             smallDescription,
@@ -385,6 +388,16 @@ export default function CoursesPage()
                                                                         className="col-span-3"
                                                                     />
                                                                 </div>
+                                                                <div>
+                                                                    <Label htmlFor="imageUrl">Course Video URL</Label>
+                                                                    <Input
+                                                                        id="youtubeUrl"
+                                                                        value={youtubeUrl}
+                                                                        onChange={(e) => setYoutubeUrl(e.target.value)}
+                                                                        placeholder="https://example.com/image.jpg"
+                                                                        className="mt-3"
+                                                                    />
+                                                                </div>
                                                                 <DialogFooter>
                                                                     <Button type="submit">Save changes</Button>
                                                                 </DialogFooter>
@@ -481,6 +494,16 @@ export default function CoursesPage()
                                             id="imageUrl"
                                             value={imageUrl}
                                             onChange={(e) => setImageUrl(e.target.value)}
+                                            placeholder="https://example.com/image.jpg"
+                                            className="mt-3"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="imageUrl">Course Video URL</Label>
+                                        <Input
+                                            id="youtubeUrl"
+                                            value={youtubeUrl}
+                                            onChange={(e) => setYoutubeUrl(e.target.value)}
                                             placeholder="https://example.com/image.jpg"
                                             className="mt-3"
                                         />

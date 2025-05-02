@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, CreditCard, Filter, Plus, Search as SearchIcon, Star, Users } from "lucide-react";
 import axios from "axios";
+import PurchaseComponent from "@/components/ui/Components/PurchaseComponent";
+import PlayerComponent from "@/components/ui/Components/Player";
 
 
 
@@ -24,6 +26,7 @@ export default function Courses()
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
     const [user, setUser] = useState({})
+    const [myPurchasedCourses, setMyPurchasedCourses] = useState([])
 
 
     const [myCourses, setMyCourses] = useState([]);
@@ -50,6 +53,29 @@ export default function Courses()
         };
 
         fetchMyCourses();
+    }, []);
+
+    useEffect(() =>
+    {
+        const fetchMyPurchaseCourses = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem("token");
+                const res = await axios.get("http://localhost:5000/api/users/purchased/courses", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setMyPurchasedCourses(res.data.data);
+                console.log(res.data.data);
+            } catch (err)
+            {
+                console.error("Error fetching my purchased courses:", err);
+            }
+        };
+
+        fetchMyPurchaseCourses();
     }, []);
 
 
@@ -140,106 +166,46 @@ export default function Courses()
                     </TabsList>
 
                     <TabsContent value="enrolled">
-                        <div className="mb-6">
-                            <h2 className="text-lg font-medium mb-2">Course Progress</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* <Card>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{enrolledCourses.length}</div>
-                                    </CardContent>
-                                </Card> */}
-
-                                {/* <Card>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium">Completed</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {enrolledCourses.filter(c => c.status === "completed").length}
-                                        </div>
-                                    </CardContent>
-                                </Card> */}
-
-                                {/* <Card>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {enrolledCourses.filter(c => c.status === "in-progress").length}
-                                        </div>
-                                    </CardContent>
-                                </Card> */}
-
-                                {/* <Card>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium">Overall Progress</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">
-                                            {Math.round(enrolledCourses.reduce((acc, curr) => acc + curr.progress, 0) / enrolledCourses.length)}%
-                                        </div>
-                                    </CardContent>
-                                </Card> */}
-                            </div>
-                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* {enrolledCourses.map(course => (
-                                <Card key={course.id} className="overflow-hidden">
-                                    <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        className="w-full h-48 object-cover"
-                                    />
-
+                            {myPurchasedCourses.map((course, index) => (
+                                <Card key={index} className="overflow-hidden">
                                     <CardHeader>
-                                        <div className="flex justify-between items-start">
-                                            <CardTitle className="text-lg">{course.title}</CardTitle>
-                                            {course.status === "completed" ? (
-                                                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                                                    <CheckCircle className="w-3 h-3 mr-1" /> Completed
-                                                </Badge>
-                                            ) : (
-                                                <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">
-                                                    <Clock className="w-3 h-3 mr-1" /> In Progress
-                                                </Badge>
-                                            )}
-                                        </div>
+                                        <CardTitle>{course.savedSmallDescription || "Course Title"}</CardTitle>
                                         <CardDescription>
-                                            {course.instructor} • {course.department}
+                                            Lecturer: {course.savedLecturerEmail || "Unknown"}
                                         </CardDescription>
                                     </CardHeader>
 
                                     <CardContent>
-                                        <div className="mb-4">
-                                            <div className="flex justify-between text-sm mb-1">
-                                                <span>Progress</span>
-                                                <span>{course.progress}%</span>
-                                            </div>
-                                            <Progress value={course.progress} className="h-2" />
-                                        </div>
+                                        {course?.savedImageUrl && (
+                                            <img
+                                                src={course.savedImageUrl}
+                                                alt="Course Thumbnail"
+                                                className="w-full h-40 object-cover rounded-lg mb-3"
+                                            />
+                                        )}
 
-                                        <div className="flex justify-between text-sm text-muted-foreground">
-                                            <span>{course.completed}/{course.lessons} lessons</span>
-                                            <span>Last accessed {course.lastAccessed}</span>
-                                        </div>
+                                        <p className="text-sm mb-1">{course.savedFullDescription}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            Duration: {course.savedDuration} | Quantity: {course.savedQuantity}
+                                        </p>
+
+                                        <p className="mt-2 text-sm font-medium">Topics:</p>
+                                        <ul className="list-disc list-inside text-sm">
+                                            <li>{course.savedTopicOne}</li>
+                                            <li>{course.savedTopicTwo}</li>
+                                        </ul>
+
+                                        <p className="mt-2 text-sm">Price: Rs.{course.savedPrice} (You already Purchased)</p>
+
+
+                                        <PlayerComponent youtubeUrl={course.savedYoutubeUrl} topicOne={course.savedTopicOne} topicTwo={course.savedTopicTwo} savedLecturerEmail={course.savedLecturerEmail} savedDuration={course.savedDuration} savedFullDescription={course.savedFullDescription} savedQuantity={course.savedQuantity} savedSmallDescription={course.savedSmallDescription} />
                                     </CardContent>
-
-                                    <CardFooter className="flex gap-2">
-                                        <Button className="w-full">
-                                            <PlayCircle className="w-4 h-4 mr-2" /> Continue
-                                        </Button>
-                                        <Button variant="outline" size="icon">
-                                            <Download className="h-4 w-4" />
-                                        </Button>
-                                    </CardFooter>
                                 </Card>
-                            ))} */}
+                            ))}
                         </div>
+
                     </TabsContent>
 
                     <TabsContent value="available">
@@ -318,7 +284,7 @@ export default function Courses()
                                     </CardContent>
 
                                     <CardFooter className="flex justify-between items-center">
-                                        <div className="font-bold text-lg">${course.price}</div>
+                                        <div className="font-bold text-lg">Rs.{course.price}</div>
                                         <Dialog open={open} >
                                             <DialogTrigger asChild>
                                                 <Button
@@ -387,7 +353,7 @@ export default function Courses()
                                                             </div>
                                                             <div className="flex flex-col items-center justify-center p-3 bg-gray-50 rounded-lg border border-gray-100">
                                                                 <span className="text-xs uppercase tracking-wide text-gray-500">Price</span>
-                                                                <span className="font-bold text-gray-900">${courseDetails?.price}</span>
+                                                                <span className="font-bold text-gray-900">Rs.{courseDetails?.price}</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -403,9 +369,8 @@ export default function Courses()
 
                                                 <DialogFooter className="flex gap-2 mt-4">
                                                     {!loading && courseDetails && (
-                                                        <Button className="bg-black hover:bg-black/90 text-white">
-                                                            <CheckCircle className="w-4 h-4 mr-2" /> Enroll Now
-                                                        </Button>
+
+                                                        <PurchaseComponent loggedUser={user.email} price={courseDetails.price} lecturerEmail={courseDetails.lecturerEmail} duration={courseDetails.duration} quantity={courseDetails.lessonsQuantity} fullDescription={courseDetails.fullDescription} smallDescription={courseDetails.smallDescription} topicOne={courseDetails.topicOne} topicTwo={courseDetails.topicTwo} imageUrl={courseDetails.imageUrl} username={user.name} youtubeUrl={courseDetails.youtubeUrl} />
                                                     )}
                                                     <Button variant="outline" onClick={() => setOpen(false)}>
                                                         Close

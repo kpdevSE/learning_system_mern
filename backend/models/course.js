@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const courseSchema = new mongoose.Schema({
     lecturerEmail: { type: String, required: true },
     imageUrl: { type: String, required: true },
+    youtubeUrl: { type: String, required: true },
     topicOne: { type: String, required: true },
     topicTwo: { type: String },
     smallDescription: { type: String, required: true },
