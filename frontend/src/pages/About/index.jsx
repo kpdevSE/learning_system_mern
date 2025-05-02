@@ -4,6 +4,11 @@ import Aboutus from '../../assets/aboutus.jpg'
 import Boy from '../../assets/boy.jpg'
 import Girl from '../../assets/girl.jpg'
 import FooterComponent from '@/components/ui/Components/Footer';
+import Nadeesha from '../../assets/ProfileImages/Nadeesha Wishwani.jpeg'
+import Malshani from '../../assets/ProfileImages/Malshani Herath.jpeg'
+import Surani from '../../assets/ProfileImages/Surani Erandi.jpeg'
+import Thiwangi from '../../assets/ProfileImages/Thiwangi Uddima.jpeg'
+import Ranumi from '../../assets/ProfileImages/Ranumi Mihinadee.jpeg'
 
 export default function AboutPage()
 {
@@ -39,28 +44,34 @@ export default function AboutPage()
 
     const team = [
         {
-            name: "Sarah Johnson",
+            name: "Nadeesha Wishwani",
             role: "Founder & CEO",
             bio: "Former education technology executive with 15+ years of experience in the e-learning industry. Passionate about making quality education accessible to everyone.",
-            image: Girl
+            image: Nadeesha
         },
         {
-            name: "Michael Chen",
+            name: "Malshani Herath",
             role: "Chief Technology Officer",
             bio: "Tech industry veteran with expertise in building scalable learning platforms. Leads our engineering team in creating innovative solutions for online education.",
-            image: Boy
+            image: Malshani
         },
         {
-            name: "Priya Sharma",
+            name: "Surani Erandi",
             role: "Chief Learning Officer",
             bio: "Educational psychologist with a focus on adult learning. Oversees course development and ensures pedagogical excellence across all content.",
-            image: Girl
+            image: Surani
         },
         {
-            name: "David Wilson",
+            name: "Ranumi Mihinadee",
             role: "Head of Partnerships",
             bio: "Builds strategic relationships with educational institutions and industry leaders to expand our course offerings and create career opportunities for students.",
-            image: Boy
+            image: Ranumi
+        },
+        {
+            name: "Thiwangi Uddima",
+            role: "Director of Student Success",
+            bio: "With a background in student services and educational outreach, Isuru brings over a decade of experience in improving learner engagement and satisfaction.",
+            image: Thiwangi
         }
     ];
 
