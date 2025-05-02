@@ -168,3 +168,19 @@ exports.getCourseDetailsForStudents = async (req, res) =>
         return res.status(500).json({ message: 'Server error' });
     }
 }
+
+
+// Courses Controller
+exports.getCoursesCount = async (req, res) =>
+{
+    try
+    {
+        const count = await Course.countDocuments();
+        console.log(count)
+        res.status(200).json({ success: true, total: count });
+    } catch (error)
+    {
+        console.error("Error in getCoursesCount:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

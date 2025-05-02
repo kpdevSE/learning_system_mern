@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import StudentSidebar from "../../Components/StudentSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, BookOpen, Award, User, Calendar as CalendarIcon, Activity } from "lucide-react";
+import { Clock, BookOpen, Award, User, Calendar as CalendarIcon, Activity, LoaderIcon } from "lucide-react";
+import axios from "axios";
 
 export default function StudentDashboard()
 {
@@ -22,6 +23,37 @@ export default function StudentDashboard()
         { id: 2, title: "Physics Lab Report", dueDate: "Apr 30", subject: "Physics", status: "In Progress" },
         { id: 3, title: "Programming Project", dueDate: "May 5", subject: "Computer Science", status: "Not Started" }
     ];
+
+    const [courseCount, setCourseCount] = useState();
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() =>
+    {
+        const fetchStudentCount = async () =>
+        {
+
+            try
+            {
+                setLoading(true)
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:5000/api/users/coursecount/count', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setCourseCount(response.data.total);
+                console.log(response.data.total)
+
+            } catch (err)
+            {
+                console.error('Error fetching courses count:', err);
+            }
+            setLoading(false)
+        };
+
+        fetchStudentCount();
+    }, []);
+
 
     return (
         <div className="flex h-screen bg-slate-50">
@@ -43,12 +75,19 @@ export default function StudentDashboard()
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">Classes Today</CardTitle>
+                            <CardTitle className="text-sm font-medium">All Courses</CardTitle>
                             <Clock className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">3</div>
-                            <p className="text-xs text-muted-foreground">2 remaining</p>
+                            <span className="text-2xl font-bold">{
+                                loading ? (
+                                    <div>
+                                        <LoaderIcon />
+                                    </div>) : (
+                                    <div>
+                                        {courseCount}
+                                    </div>
+                                )}</span>
                         </CardContent>
                     </Card>
 

@@ -3,7 +3,7 @@ const router = express.Router();
 const { getCurrentUser, updateUserProfile, getStudentCount } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
 const { getteacherProfile, addProfile } = require('../controllers/teacherProfileController');
-const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents } = require('../controllers/courseController');
+const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents, getCoursesCount } = require('../controllers/courseController');
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
 
 
@@ -27,6 +27,7 @@ router.get('/courses/:id', getCourseById);
 router.delete('/courses/:id', deleteCourseById);
 router.put('/courses/:id', updateCourseById)
 router.get('/studentcourses/:id', getCourseDetailsForStudents)
+router.get('/coursecount/count', getCoursesCount)
 
 
 module.exports = router;
