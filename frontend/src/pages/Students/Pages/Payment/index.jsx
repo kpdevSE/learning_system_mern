@@ -27,6 +27,10 @@ import
     CircleAlert
 } from "lucide-react";
 import axios from "axios";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import CompanyLogo from '../../../../assets/ProfileImages/logo.png'
+
 
 export default function Payment()
 {
@@ -35,6 +39,7 @@ export default function Payment()
     const [newPaymentDialogOpen, setNewPaymentDialogOpen] = useState(false);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
+    const [user, setUser] = useState({})
 
     // Mock payment history data
     const paymentHistory = [
@@ -149,6 +154,158 @@ export default function Payment()
 
     const [payement, setPayemeny] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const companyInfo = {
+        name: "English Academy",
+        address: "123 Education Street, City, State 12345",
+        email: "support@educationinstitute.com",
+        phone: "+1 (555) 123-4567",
+        website: "www.educationinstitute.com",
+        logo: CompanyLogo
+    };
+
+    const loadImageAsBase64 = (url) =>
+    {
+        return new Promise((resolve, reject) =>
+        {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () =>
+            {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.onerror = reject;
+            img.src = url;
+        });
+    };
+
+    const generateInvoicePDF = async (payment) =>
+    {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.width;
+
+        // Add company logo (placeholder)
+        doc.addImage(companyInfo.logo, 'PNG', 15, 15, 50, 15);
+
+        // Add invoice title and number
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text("INVOICE", pageWidth / 2, 30, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text(`Invoice #: ${payment._id}`, pageWidth - 15, 15, { align: 'right' });
+
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text(companyInfo.name, 15, 40);
+        doc.text(companyInfo.address, 15, 45);
+        doc.text(`Phone: ${companyInfo.phone}`, 15, 50);
+        doc.text(`Email: ${companyInfo.email}`, 15, 55);
+        doc.text(`Website: ${companyInfo.website}`, 15, 60);
+
+        doc.setDrawColor(220, 220, 220);
+        doc.line(15, 65, pageWidth - 15, 65);
+
+        // Student Info
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text("Billed To:", 15, 75);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+
+        // Increased space between student and lecturer email
+        doc.text(`Student Email : ${payment.loggedUserEmail}`, 15, 80);
+        doc.text(`Lecturer Email : ${payment.savedLecturerEmail}`, 15, 90); // Adjusted y-coordinate
+
+        console.log(payment.loggedUserEmail);
+        console.log(payment.savedLecturerEmail);
+
+        // Payment Details
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text("Payment Details", 15, 105);
+
+        // Displaying Payment Details without using table
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Description: ${payment.savedSmallDescription}`, 15, 115);
+        doc.text(`Amount: Rs. ${payment.savedPrice}`, 15, 120);
+
+        const finalY = 130;  // Adjusted for a cleaner layout
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text("Total Amount:", 120, finalY);
+        doc.text(`Rs. ${payment.savedPrice}`, pageWidth - 15, finalY, { align: 'right' });
+
+        doc.text("Payment Status:", 120, finalY + 5);
+        doc.text("Completed", pageWidth - 15, finalY + 5, { align: 'right' });
+
+        doc.text("Payment Method:", 120, finalY + 10);
+        doc.text("Online", pageWidth - 15, finalY + 10, { align: 'right' });
+
+        doc.setDrawColor(220, 220, 220);
+        doc.line(15, finalY + 20, pageWidth - 15, finalY + 20);
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text("Thank you for your payment!", pageWidth / 2, finalY + 30, { align: 'center' });
+        doc.text("This is an electronically generated receipt and does not require a signature.",
+            pageWidth / 2, finalY + 35, { align: 'center' });
+
+        doc.save(`Invoice-${payment._id}.pdf`);
+    };
+
+    // Open invoice preview modal
+    const openInvoicePreview = (payment) =>
+    {
+        setSelectedPayment(payment);
+        setPreviewOpen(true);
+    };
+
+    // Close invoice preview modal
+    const closeInvoicePreview = () =>
+    {
+        setPreviewOpen(false);
+    };
+
+
+
+
+
 
 
     useEffect(() =>
@@ -269,11 +426,22 @@ export default function Payment()
                                                 <TableCell>Online</TableCell>
                                                 <TableCell><div className="bg-green-300 text-green-800 font-semibold rounded-lg flex items-center text-center justify-center">completed</div></TableCell>
                                                 <TableCell className="text-right">
-                                                    {/* {payment.receipt && ( */}
-                                                    <Button variant="ghost" size="sm">
-                                                        <Download className="h-4 w-4 mr-1" /> Receipt
-                                                    </Button>
-                                                    {/* )} */}
+                                                    <div className="flex items-center justify-end space-x-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => openInvoicePreview(payment)}
+                                                        >
+                                                            <FileText className="h-4 w-4 mr-1" /> Preview
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => generateInvoicePDF(payment)}
+                                                        >
+                                                            <Download className="h-4 w-4 mr-1" /> Invoice
+                                                        </Button>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -288,6 +456,93 @@ export default function Payment()
                                     </TableBody>
                                 </Table>
                             </CardContent>
+
+                            <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                                <DialogContent className="sm:max-w-[600px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Invoice Preview</DialogTitle>
+                                        <DialogDescription>
+                                            Preview your invoice before downloading
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    {selectedPayment && (
+                                        <div className="p-4 border rounded-lg">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <img src={companyInfo.logo} alt="Logo" className="h-12 mb-4" />
+                                                    <h3 className="text-lg font-bold">{companyInfo.name}</h3>
+                                                    <p className="text-sm text-gray-500">{companyInfo.address}</p>
+                                                    <p className="text-sm text-gray-500">{companyInfo.email}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <h2 className="text-xl font-bold">INVOICE</h2>
+                                                    <p className="text-sm">#{selectedPayment._id}</p>
+                                                    <p className="text-sm">Date: {new Date(selectedPayment.createdAt).toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+
+                                            {payement.map((e) =>
+                                            {
+                                                return (
+
+                                                    <div className="border-t border-b my-4 py-4">
+                                                        <h4 className="font-medium mb-2">Bill To:</h4>
+                                                        <p className="text-sm">Student Name: <span className="font-bold"> {e.loggedUserEmail}</span></p>
+                                                        <p className="text-sm">Lecturer Email: <span className="font-bold"> {e.savedLecturerEmail}</span> </p>
+                                                    </div>
+                                                )
+
+                                            })}
+
+                                            <table className="w-full mb-6">
+                                                <thead>
+                                                    <tr className="bg-gray-100">
+                                                        <th className="py-2 px-4 text-left">Description</th>
+                                                        <th className="py-2 px-4 text-right">Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td className="py-2 px-4 border-b">{selectedPayment.savedSmallDescription}</td>
+                                                        <td className="py-2 px-4 text-right border-b">Rs.{selectedPayment.savedPrice}</td>
+                                                    </tr>
+                                                    <tr className="font-bold">
+                                                        <td className="py-2 px-4 text-right">Total:</td>
+                                                        <td className="py-2 px-4 text-right">Rs.{selectedPayment.savedPrice}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <div className="flex justify-between text-sm">
+                                                <div>
+                                                    <p>Payment Status: <span className="font-medium">Completed</span></p>
+                                                    <p>Payment Method: <span className="font-medium">Online</span></p>
+                                                </div>
+                                                <div className="text-center text-gray-500 text-xs mt-4">
+                                                    <p>Thank you for your payment!</p>
+                                                    <p>This is an electronically generated receipt and does not require a signature.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <DialogFooter className="flex justify-between">
+                                        <Button variant="outline" onClick={closeInvoicePreview}>Close</Button>
+                                        <Button
+                                            onClick={() =>
+                                            {
+                                                if (selectedPayment)
+                                                {
+                                                    generateInvoicePDF(selectedPayment);
+                                                }
+                                            }}
+                                        >
+                                            <Download className="h-4 w-4 mr-2" /> Download PDF
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
 
                             <CardFooter className="flex justify-between">
                                 <Button variant="outline">

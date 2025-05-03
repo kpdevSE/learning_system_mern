@@ -204,7 +204,8 @@ export default function StudentSidebar()
                             </Avatar>
                             <div className="ml-3">
                                 <p className="text-sm font-medium">{user?.name || "Student Name"}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "example@gmail.com"}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.lecturerEmail || "example@gmail.com"}</p>
+
                             </div>
                         </div>
                         <div className="mt-3 flex space-x-2">
