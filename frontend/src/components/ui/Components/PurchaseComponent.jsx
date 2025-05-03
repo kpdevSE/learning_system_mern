@@ -75,8 +75,10 @@ export default function PurchaseComponent({ loggedUser, price, lecturerEmail, du
             if (res.data.success)
             {
                 toast.success("Congratulations! Your Payement is Successfull")
-                window.location.reload()
+
             }
+
+            window.location.reload()
         } catch (err)
         {
             console.error("Payment failed:", err)

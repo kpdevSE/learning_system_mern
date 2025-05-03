@@ -173,7 +173,7 @@ export default function StudentProfilePage()
                                     ) : (
                                         <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
                                     )}
-                                    <AvatarFallback>{loggedUser?.name?.charAt(0) || "U"}</AvatarFallback>
+                                    <AvatarFallback>{user?.name.charAt(0) || "U"}</AvatarFallback>
                                 </Avatar>
                                 <div>
                                     <CardTitle>{loggedUser?.name}</CardTitle>
@@ -326,6 +326,7 @@ export default function StudentProfilePage()
                                 </form>
                             ) : (
                                 <div className="space-y-4">
+
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
                                             <h3 className="font-medium text-sm text-gray-500">Major</h3>
@@ -339,7 +340,7 @@ export default function StudentProfilePage()
 
                                     <div>
                                         <h3 className="font-medium text-sm text-gray-500">Bio</h3>
-                                        <p className="text-gray-700">{formData.bio}</p>
+                                        <p className="text-gray-700">{user.bio}</p>
                                     </div>
                                 </div>
                             )}
