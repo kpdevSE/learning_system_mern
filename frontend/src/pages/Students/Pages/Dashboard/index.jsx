@@ -4,8 +4,28 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
-import { Clock, BookOpen, Award, User, Calendar as CalendarIcon, Activity, LoaderIcon } from "lucide-react";
+import { Clock, BookOpen, Award, User, Calendar as CalendarIcon, Activity, LoaderIcon, Bell } from "lucide-react";
 import axios from "axios";
+import { Terminal } from "lucide-react"
+import
+{
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { toast } from "sonner";
+import
+{
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
 
 export default function StudentDashboard()
 {
@@ -26,6 +46,40 @@ export default function StudentDashboard()
 
     const [courseCount, setCourseCount] = useState();
     const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState([])
+    const [user, setUser] = useState({})
+    const [filteredMessages, setFilteredMessages] = useState([]);
+
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const loggedRole = user.role;
+    console.log(loggedRole)
 
     useEffect(() =>
     {
@@ -54,6 +108,49 @@ export default function StudentDashboard()
         fetchStudentCount();
     }, []);
 
+    useEffect(() =>
+    {
+        const fetchMessages = async () =>
+        {
+            try
+            {
+                setLoading(true);
+
+                const token = localStorage.getItem("token");
+
+
+
+                const response = await axios.get(`http://localhost:5000/api/users/getnotifications`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setMessage(response.data.notifications);
+                console.log(response.data.notifications);
+            } catch (err)
+            {
+                console.error("Error fetching notifications:", err);
+            } finally
+            {
+                setLoading(false);
+            }
+        };
+
+        fetchMessages();
+    }, []);
+
+    useEffect(() =>
+    {
+        if (user && message.length > 0)
+        {
+            const role = user.role;
+            const filtered = message.filter((msg) => msg.role === role);
+            setFilteredMessages(filtered);
+            console.log("Filtered Messages:", filtered);
+        }
+    }, [user, message]);
+
 
     return (
         <div className="flex h-screen bg-slate-50">
@@ -65,6 +162,41 @@ export default function StudentDashboard()
                         <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
                         <p className="text-muted-foreground">Welcome back! Here's an overview of your academic progress.</p>
                     </div>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Bell className="h-5 w-5" />
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Notification</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    View your Notifications
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <Alert>
+                                <Terminal className="h-4 w-4" />
+                                <AlertTitle>Heads up!</AlertTitle>
+                                <AlertDescription>
+                                    {filteredMessages.map((e, index) => (
+                                        <div>
+
+                                            <p className="text-gray-800 text-lg">{e.message}</p>
+                                            <p className="text-[13px] text-gray-400 font-semibold">By Admin User</p>
+                                        </div>
+
+                                    ))}
+                                </AlertDescription>
+                            </Alert>
+
+
+                            <AlertDialogFooter>
+                                <AlertDialogCancel className="bg-black text-white hover:bg-black hover:text-white cursor-pointer">Cancel</AlertDialogCancel>
+
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                     <Button className="flex items-center gap-2 bg-black hover:bg-black">
                         <User size={16} />
                         My Profile

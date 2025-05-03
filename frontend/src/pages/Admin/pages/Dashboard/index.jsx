@@ -27,10 +27,71 @@ import
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import
+{
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import axios from "axios";
+
+
 export default function AdminDashboard()
 {
 
+    const [role, setRole] = useState("");
+    const [message, setMessage] = useState("");
+    const [isSending, setIsSending] = useState(false);
 
+    const handleSend = async () =>
+    {
+        if (!role || !message.trim())
+        {
+            setFeedback("Please select a role and enter a message.");
+            return;
+        }
+
+        try
+        {
+            setIsSending(true);
+            const token = localStorage.getItem('token');
+            const response = await axios.post("http://localhost:5000/api/users/savenotification", {
+                role,
+                message,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+
+            setMessage("");
+            setRole("");
+            toast.success("Message Sent")
+            window.location.reload()
+        } catch (error)
+        {
+            if (error.response)
+            {
+                toast.error(error.response.data.error || "Failed to send notification.");
+            } else
+            {
+                toast.error("An unexpected error occurred.");
+            }
+        } finally
+        {
+            setIsSending(false);
+        }
+    };
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
             {/* Sidebar */}
@@ -59,9 +120,49 @@ export default function AdminDashboard()
                                 />
                             </div>
 
-                            <Button variant="ghost" size="icon">
-                                <Bell className="h-5 w-5" />
-                            </Button>
+
+
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Bell className="h-5 w-5" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Send Notification</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Choose a role and send a message to the users.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+
+                                    <div className="space-y-4">
+                                        <Select value={role} onValueChange={(val) => setRole(val)}>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Select Role" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="teacher">Teacher</SelectItem>
+                                                <SelectItem value="student">Student</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Textarea
+                                            placeholder="Type your message here..."
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                        />
+
+                                    </div>
+
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel disabled={isSending}>Cancel</AlertDialogCancel>
+                                        <Button onClick={handleSend} disabled={isSending}>
+                                            {isSending ? "Sending..." : "Send"}
+                                        </Button>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
