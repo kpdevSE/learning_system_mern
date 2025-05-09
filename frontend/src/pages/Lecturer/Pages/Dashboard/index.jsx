@@ -36,6 +36,38 @@ export default function LecturerDashboard()
 
     const [studentCount, setStudentCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [notificationCount, setNotificationsCount] = useState()
+
+
+    // Get Notifications Count
+    useEffect(() =>
+    {
+        const fetchNotificationCount = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const response = await axios.get('http://localhost:5000/api/users/teachernotificationcount',
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        withCredentials: true,
+                    }
+                );
+
+                setNotificationsCount(response.data.count)
+                console.log(response.data.count)
+            } catch (err)
+            {
+                console.log("Error Fetching Notifications Count")
+            }
+        }
+
+        fetchNotificationCount()
+    }, [])
+
 
 
     useEffect(() =>
@@ -181,9 +213,14 @@ export default function LecturerDashboard()
 
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <Bell className="h-5 w-5" />
-                            </Button>
+                            <div className="flex items-center">
+                                <Button variant="ghost" size="icon">
+                                    <Bell className="h-20 w-20" />
+                                </Button>
+                                <div className="text-red-600 font-semibold w-[20px] h-[20px] rounded relative bg-white flex items-center justify-center">
+                                    {notificationCount}
+                                </div>
+                            </div>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>

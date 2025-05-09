@@ -6,7 +6,7 @@ const { getteacherProfile, addProfile } = require('../controllers/teacherProfile
 const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents, getCoursesCount } = require('../controllers/courseController');
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
 const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer } = require('../controllers/payementController');
-const { getNotificationsByRole, sendNotification } = require('../controllers/notificationsController');
+const { getNotificationsByRole, sendNotification, getStudentNotificationCount, getteachersNotificationsCount } = require('../controllers/notificationsController');
 
 
 // Protected routes
@@ -40,6 +40,7 @@ router.get('/countofpayement', getPayementCountToLecturer)
 // Notifications
 router.get('/getnotifications', getNotificationsByRole)
 router.post('/savenotification', sendNotification)
-
+router.get('/notificationcount', getStudentNotificationCount);
+router.get('/teachernotificationcount', getteachersNotificationsCount);
 
 module.exports = router;

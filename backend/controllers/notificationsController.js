@@ -33,3 +33,33 @@ exports.getNotificationsByRole = async (req, res) =>
         res.status(500).json({ error: 'Failed to fetch notifications.' });
     }
 };
+
+// Notifications for Students
+exports.getStudentNotificationCount = async (req, res) =>
+{
+    try
+    {
+        const count = await Notification.countDocuments({ role: 'student' });
+        res.status(200).json({ success: true, count });
+
+        console.log(count);
+    } catch (error)
+    {
+        res.status(500).json({ error: 'Failed to fetch notification count.' });
+    }
+};
+
+// Notifications for Teachers
+exports.getteachersNotificationsCount = async (req, res) =>
+{
+    try
+    {
+        const count = await Notification.countDocuments({ role: 'teacher' });
+        res.status(200).json({ success: true, count });
+
+        console.log(count);
+    } catch (error)
+    {
+        res.status(500).json({ error: 'Failed to fetch notification count.' });
+    }
+};
