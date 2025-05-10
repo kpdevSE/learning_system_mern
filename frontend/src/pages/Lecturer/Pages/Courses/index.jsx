@@ -404,7 +404,7 @@ export default function CoursesPage()
                                                             </form>
                                                         </DialogContent>
                                                     </Dialog>
-                                                    <Button variant="outline" size="sm" >Lessons</Button>
+
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <Dialog open={open} onOpenChange={setOpen}>

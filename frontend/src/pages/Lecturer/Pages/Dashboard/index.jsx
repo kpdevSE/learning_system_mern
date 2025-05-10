@@ -37,6 +37,7 @@ export default function LecturerDashboard()
     const [studentCount, setStudentCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [notificationCount, setNotificationsCount] = useState()
+    const [user, setUser] = useState({})
 
 
     // Get Notifications Count
@@ -72,6 +73,78 @@ export default function LecturerDashboard()
 
     useEffect(() =>
     {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const lecturerEmail = user.email;
+
+    const [reviewsDataDetails, setReviewsDataDetails] = useState({
+        average: 0,
+        total: 0,
+        reviews: [],
+    });
+
+    useEffect(() =>
+    {
+        const fetchReviews = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/users/getreviewbyemail/${encodeURIComponent(lecturerEmail)}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setReviewsDataDetails({
+                    average: res.data.average,
+                    total: res.data.total,
+                    reviews: res.data.data,
+                });
+            } catch (err)
+            {
+                console.error("Error fetching reviews:", err);
+            } finally
+            {
+                setLoading(false);
+            }
+        };
+
+        if (lecturerEmail)
+        {
+            setLoading(true);
+            fetchReviews();
+        }
+    }, [lecturerEmail]);
+
+
+
+    useEffect(() =>
+    {
         const fetchStudentCount = async () =>
         {
             const token = localStorage.getItem('token');
@@ -101,7 +174,7 @@ export default function LecturerDashboard()
 
 
     const [message, setMessage] = useState([])
-    const [user, setUser] = useState({})
+
     const [filteredMessages, setFilteredMessages] = useState([]);
 
     useEffect(() =>
@@ -297,10 +370,10 @@ export default function LecturerDashboard()
                             </CardHeader>
                             <CardContent className="flex items-center justify-between">
                                 <div className="flex items-center">
-                                    <span className="text-2xl font-bold mr-2">4.8</span>
+                                    <span className="text-2xl font-bold mr-2">{Number(reviewsDataDetails.average).toFixed(1)}</span>
                                     <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                                 </div>
-                                <span className="text-sm text-muted-foreground">(32 reviews)</span>
+                                <span className="text-sm text-muted-foreground font-bold">{reviewsDataDetails.total} reviews</span>
                             </CardContent>
                         </Card>
                     </div>
