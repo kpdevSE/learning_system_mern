@@ -81,7 +81,8 @@ exports.uploadPDF = (req, res) =>
                 title: req.body.title,
                 filename: req.file.filename,
                 path: req.file.path,
-                uploadDate: Date.now()
+                uploadDate: Date.now(),
+                loggedEmail: req.body.loggedEmail
             });
 
             await newPDF.save();
@@ -115,6 +116,29 @@ exports.getAllPDFs = async (req, res) =>
     try
     {
         const pdfs = await PDF.find().select('title filename uploadDate');
+
+        res.status(200).json({
+            success: true,
+            count: pdfs.length,
+            data: pdfs
+        });
+    } catch (error)
+    {
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving PDFs',
+            error: error.message
+        });
+    }
+};
+// Get pdf by email
+exports.getAllPDFsByEmail = async (req, res) =>
+{
+    try
+    {
+        const email = req.user.email; // Assumes email is added to req.user via middleware (e.g. JWT auth)
+
+        const pdfs = await PDF.find({ loggedEmail: email }).select('title filename uploadDate');
 
         res.status(200).json({
             success: true,

@@ -26,9 +26,11 @@ export default function ContentLibraryPage()
 
     const [selectedFile, setSelectedFile] = useState(null);
     const [title, setTitle] = useState("");
+
     const [isUploading, setIsUploading] = useState(false);
     const [uploadStatus, setUploadStatus] = useState(null);
     const [open, setOpen] = useState(false);
+    const [user, setUser] = useState({});
 
     const handleFileChange = (e) =>
     {
@@ -51,6 +53,39 @@ export default function ContentLibraryPage()
             });
         }
     };
+    // Fetch User Details
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
+
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const userEmail = user.email
+    console.log(userEmail)
+
+    const [loggedEmail, setLoggedEmail] = useState(userEmail)
     // Upload PDF
     const handleUpload = async (e) =>
     {
@@ -70,6 +105,7 @@ export default function ContentLibraryPage()
         const formData = new FormData();
         formData.append("pdf", selectedFile);
         formData.append("title", title.trim());
+        formData.append("loggedEmail", user.email);
 
         try
         {
@@ -134,7 +170,7 @@ export default function ContentLibraryPage()
             try
             {
                 const token = localStorage.getItem('token');
-                const response = await axios.get("http://localhost:5000/api/users/pdfall", {
+                const response = await axios.get("http://localhost:5000/api/users/pdfbyemail", {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -158,6 +194,8 @@ export default function ContentLibraryPage()
 
         fetchPDFs();
     }, []);
+
+
     const [activeTab, setActiveTab] = useState("all");
 
     // Sample content items (you would fetch these from your backend)
@@ -272,11 +310,8 @@ export default function ContentLibraryPage()
 
                 <Tabs defaultValue="all" className="mb-6">
                     <TabsList className="grid grid-cols-5 w-full max-w-md">
-                        <TabsTrigger value="all">All</TabsTrigger>
-                        <TabsTrigger value="lectures">Lectures</TabsTrigger>
-                        <TabsTrigger value="tutorials">Tutorials</TabsTrigger>
-                        <TabsTrigger value="assessments">Assessments</TabsTrigger>
-                        <TabsTrigger value="resources">Resources</TabsTrigger>
+                        <TabsTrigger value="all">Uploaded</TabsTrigger>
+
                     </TabsList>
 
                     <TabsContent value="all" className="mt-6">
@@ -316,44 +351,7 @@ export default function ContentLibraryPage()
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="lectures">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {contentItems
-                                .filter(item => item.category === "lectures")
-                                .map((item) => (
-                                    <Card key={item.id}>
-                                        <CardHeader className="pb-3">
-                                            <FileText className="h-10 w-10 text-blue-500 bg-blue-50 p-2 rounded-lg" />
-                                            <CardTitle className="mt-3">{item.title}</CardTitle>
-                                            <CardDescription className="flex justify-between">
-                                                <span className="capitalize">{item.category}</span>
-                                                <span>{item.date}</span>
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardFooter className="flex justify-between pt-3">
-                                            <Button variant="outline" size="sm">View</Button>
-                                            <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                                                <Download size={14} />
-                                                Download
-                                            </Button>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
-                        </div>
-                    </TabsContent>
 
-                    {/* Other tab contents would follow the same pattern */}
-                    <TabsContent value="tutorials" className="mt-6">
-                        <p className="text-center text-gray-500 py-8">Tutorial content will appear here</p>
-                    </TabsContent>
-
-                    <TabsContent value="assessments" className="mt-6">
-                        <p className="text-center text-gray-500 py-8">Assessment content will appear here</p>
-                    </TabsContent>
-
-                    <TabsContent value="resources" className="mt-6">
-                        <p className="text-center text-gray-500 py-8">Resource content will appear here</p>
-                    </TabsContent>
                 </Tabs>
             </div>
         </div>

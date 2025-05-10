@@ -18,6 +18,10 @@ const PDFSchema = new mongoose.Schema({
     uploadDate: {
         type: Date,
         default: Date.now
+    },
+    loggedEmail: {
+        type: String,
+        required: true
     }
 });
 
