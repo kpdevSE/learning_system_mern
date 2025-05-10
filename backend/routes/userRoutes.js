@@ -7,6 +7,7 @@ const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, delete
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
 const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer } = require('../controllers/payementController');
 const { getNotificationsByRole, sendNotification, getStudentNotificationCount, getteachersNotificationsCount } = require('../controllers/notificationsController');
+const { uploadPDF, getAllPDFs, deletePDF } = require('../controllers/pdfController');
 
 
 // Protected routes
@@ -42,5 +43,10 @@ router.get('/getnotifications', getNotificationsByRole)
 router.post('/savenotification', sendNotification)
 router.get('/notificationcount', getStudentNotificationCount);
 router.get('/teachernotificationcount', getteachersNotificationsCount);
+
+// PDF
+router.post('/uploadpdf', uploadPDF);
+router.get('/pdfall', getAllPDFs);
+router.delete('/pdf/:filename', deletePDF);
 
 module.exports = router;
