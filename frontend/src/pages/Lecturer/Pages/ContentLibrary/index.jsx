@@ -196,6 +196,8 @@ export default function ContentLibraryPage()
     }, []);
 
 
+
+
     const [activeTab, setActiveTab] = useState("all");
 
     // Sample content items (you would fetch these from your backend)
@@ -306,6 +308,7 @@ export default function ContentLibraryPage()
                         <Filter size={16} />
                         Filter
                     </Button>
+
                 </div>
 
                 <Tabs defaultValue="all" className="mb-6">
