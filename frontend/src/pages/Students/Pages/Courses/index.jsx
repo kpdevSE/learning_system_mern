@@ -7,10 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, CreditCard, Filter, Plus, Search as SearchIcon, Star, Users } from "lucide-react";
+import { CheckCircle, CreditCard, Filter, Plus, Search as SearchIcon, Star, StarHalfIcon, StarIcon, Users } from "lucide-react";
 import axios from "axios";
 import PurchaseComponent from "@/components/ui/Components/PurchaseComponent";
 import PlayerComponent from "@/components/ui/Components/Player";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 
 
@@ -136,6 +139,10 @@ export default function Courses()
         fetchUser();
     }, []);
 
+    const loggedUserEmail = user.email;
+    console.log(loggedUserEmail,);
+
+
 
     // Handle course purchase
     const handlePurchaseCourse = () =>
@@ -144,6 +151,103 @@ export default function Courses()
         alert(`Purchase successful! You are now enrolled in ${selectedCourse.title}`);
         setPurchaseDialogOpen(false);
     };
+
+
+
+    const [description, setDescription] = useState("");
+    const [starCount, setStarCount] = useState(0);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [lecturerEmail, setLecturerEmail] = useState("");
+
+
+    const handleSubmit = async (e) =>
+    {
+        e.preventDefault();
+
+        if (starCount === 0)
+        {
+            toast.error("Please select a rating");
+            return;
+        }
+
+        if (!description.trim())
+        {
+            toast.error("Please provide a review description");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try
+        {
+            const token = localStorage.getItem('token');
+            const response = await axios.post("http://localhost:5000/api/users/addreviews", {
+                lecturerEmail,
+                loggedUserEmail: user.email,
+                loggedUserName: user.name,
+                starCount,
+                description,
+                profileImage: userNew.profileImage
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+            });
+
+            toast.success("Review submitted successfully!");
+            setDescription("");
+            setStarCount(0);
+            setOpen(false);
+
+
+
+        } catch (error)
+        {
+            const errorMsg = error.response?.data?.message || "Failed to submit review";
+            toast.error(errorMsg);
+            console.error("Error submitting review:", error);
+        } finally
+        {
+            setIsSubmitting(false);
+        }
+    };
+
+    const [userNew, setUserNew] = useState({})
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+
+                const response = await axios.get(`http://localhost:5000/api/users/details`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+
+                });
+
+                setUserNew(response.data.data);
+                console.log(response.data.data)
+
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const profileImage = userNew.profileImage;
+    console.log(profileImage);
+
+    console.log(lecturerEmail)
 
 
 
@@ -198,9 +302,75 @@ export default function Courses()
                                         </ul>
 
                                         <p className="mt-2 text-sm">Price: Rs.{course.savedPrice} (You already Purchased)</p>
+                                        <div className="flex items-center justify-between mt-4">
+
+                                            <Dialog open={open} onOpenChange={setOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button onClick={(e) => setLecturerEmail(course.savedLecturerEmail)}>
+                                                        <StarIcon className="mr-2 h-4 w-4" />
+                                                        Add Review
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[425px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Add Your Review</DialogTitle>
+                                                        <DialogDescription>
+                                                            Share your experience and provide feedback. Your review will be public.
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <form onSubmit={handleSubmit}>
+                                                        <div className="grid gap-4 py-4">
+                                                            <div className="flex flex-col space-y-2">
+                                                                <Label htmlFor="rating">Rating:</Label>
+                                                                <div className="flex space-x-1">
+                                                                    {[1, 2, 3, 4, 5].map((rating) => (
+                                                                        <button
+                                                                            key={rating}
+                                                                            type="button"
+                                                                            className="focus:outline-none"
+                                                                            onClick={() => setStarCount(rating)}
+                                                                            onMouseEnter={() => setHoverRating(rating)}
+                                                                            onMouseLeave={() => setHoverRating(0)}
+                                                                        >
+                                                                            <StarIcon
+                                                                                className={`h-6 w-6 ${(hoverRating || starCount) >= rating
+                                                                                    ? "fill-yellow-400 text-yellow-400"
+                                                                                    : "text-gray-300"
+                                                                                    }`}
+                                                                            />
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col space-y-2">
+                                                                <Label htmlFor="review">Your Review:</Label>
+                                                                <Textarea
+                                                                    id="review"
+                                                                    placeholder="Share your experience with this lecturer..."
+                                                                    rows={5}
+                                                                    value={description}
+                                                                    onChange={(e) => setDescription(e.target.value)}
+                                                                    className="resize-none"
+                                                                />
+
+                                                            </div>
+                                                        </div>
+                                                        <DialogFooter>
+                                                            <Button
+                                                                type="submit"
+                                                                disabled={isSubmitting || starCount === 0 || !description.trim()}
+                                                            >
+                                                                {isSubmitting ? "Submitting..." : "Submit Review"}
+                                                            </Button>
+                                                        </DialogFooter>
+                                                    </form>
+                                                </DialogContent>
+                                            </Dialog>
 
 
-                                        <PlayerComponent youtubeUrl={course.savedYoutubeUrl} topicOne={course.savedTopicOne} topicTwo={course.savedTopicTwo} savedLecturerEmail={course.savedLecturerEmail} savedDuration={course.savedDuration} savedFullDescription={course.savedFullDescription} savedQuantity={course.savedQuantity} savedSmallDescription={course.savedSmallDescription} />
+
+                                            <PlayerComponent youtubeUrl={course.savedYoutubeUrl} topicOne={course.savedTopicOne} topicTwo={course.savedTopicTwo} savedLecturerEmail={course.savedLecturerEmail} savedDuration={course.savedDuration} savedFullDescription={course.savedFullDescription} savedQuantity={course.savedQuantity} savedSmallDescription={course.savedSmallDescription} />
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}

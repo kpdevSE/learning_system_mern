@@ -11,7 +11,7 @@ export default function LecturerSidebar()
 {
     const [isMobileView, setIsMobileView] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const [user, setUser] = useState()
+    const [user, setUser] = useState({})
     const navigate = useNavigate();
 
     // Menu items for the sidebar
@@ -155,7 +155,7 @@ export default function LecturerSidebar()
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between px-4">
-                        <div className="font-semibold text-lg">Company Name</div>
+                        <div className="font-semibold text-lg"> <span className="text-2xl font-bold text-black">English Learning</span></div>
 
                         {/* Mobile Close Button */}
                         {isMobileView && (
@@ -204,8 +204,8 @@ export default function LecturerSidebar()
 
                             </Avatar>
                             <div className="ml-3">
-                                <p className="text-sm font-medium">{user?.name || "User Name"}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "user@example.com"}</p>
+                                <p className="text-sm font-medium">{user.name || "User Name"}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user.lecturerEmail || "user@example.com"}</p>
                             </div>
                         </div>
                         <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer' onClick={handleLogout}>

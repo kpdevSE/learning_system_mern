@@ -8,6 +8,7 @@ const { addProfileStudent, getStudentProfile } = require('../controllers/student
 const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer } = require('../controllers/payementController');
 const { getNotificationsByRole, sendNotification, getStudentNotificationCount, getteachersNotificationsCount } = require('../controllers/notificationsController');
 const { uploadPDF, getAllPDFs, deletePDF, getAllPDFsByEmail } = require('../controllers/pdfController');
+const { createReview, getLecturerReviews, getAllReviews, getLecturerReviewsDetails } = require('../controllers/reviewsController');
 
 
 // Protected routes
@@ -49,4 +50,9 @@ router.post('/uploadpdf', uploadPDF);
 router.get('/pdfall', getAllPDFs);
 router.delete('/pdf/:filename', deletePDF);
 router.get('/pdfbyemail', getAllPDFsByEmail);
+
+// Reviews
+router.post('/addreviews', createReview);
+router.get('/getreviewbyemail', getAllReviews)
+router.get('/getreviewbyemail/:id', getLecturerReviewsDetails)
 module.exports = router;

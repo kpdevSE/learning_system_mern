@@ -13,7 +13,7 @@ export default function Example({ youtubeUrl, topicOne, topicTwo, savedLecturerE
     const [loading, setLoading] = useState(false)
 
     return (
-        <div className='mt-8'>
+        <div >
             <Button onClick=
                 {() =>
                 {

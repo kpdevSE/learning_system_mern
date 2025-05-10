@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Search, Star, MessageCircle, ThumbsUp, Filter, Calendar, AlertCircle, CheckCircle } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 
 export default function ReviewsPage()
 {
@@ -168,71 +170,137 @@ export default function ReviewsPage()
         ]
     };
 
-    // Helper function to render stars
+
+    const [reviews, setreviews] = useState([])
+    const [loading, setLoading] = useState(false)
+
     const renderStars = (rating) =>
     {
-        return Array(5).fill(0).map((_, i) => (
-            <Star
-                key={i}
-                className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-            />
-        ));
+        return Array(5)
+            .fill(0)
+            .map((_, i) => (
+                <Star
+                    key={i}
+                    className={`h-4 w-4 ${i < rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                />
+            ));
     };
 
-    // Helper function to render review cards
-    const renderReviewCard = (review) => (
-        <Card key={review.id} className="mb-4">
-            <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-3">
-                        <Avatar>
-                            <AvatarImage src={review.avatar} alt={review.studentName} />
-                            <AvatarFallback>{review.studentName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="font-medium">{review.studentName}</p>
-                            <div className="flex items-center gap-1 mt-1">
-                                <div className="flex">
-                                    {renderStars(review.rating)}
-                                </div>
-                                <span className="text-gray-500 text-sm">{review.date}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50">
-                        {review.courseName}
-                    </Badge>
-                </div>
-            </CardHeader>
 
-            <CardContent className="pb-3">
-                <p className="text-gray-700">{review.comment}</p>
+    const [user, setUser] = useState({})
 
-                {review.responded && (
-                    <div className="mt-4 border-l-4 border-blue-500 pl-3 py-2 bg-blue-50 rounded-sm">
-                        <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm">Your Response</p>
-                            <span className="text-xs text-gray-500">{review.responseDate}</span>
-                        </div>
-                        <p className="text-sm text-gray-700">{review.response}</p>
-                    </div>
-                )}
-            </CardContent>
+    useEffect(() =>
+    {
+        const fetchUser = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                if (!token) return;
 
-            <CardFooter className="flex justify-between border-t pt-3">
-                <div className="flex items-center text-gray-500 text-sm">
-                    <ThumbsUp className="h-4 w-4 mr-1" />
-                    {review.helpful} students found this helpful
-                </div>
+                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    withCredentials: true,
+                });
 
-                {!review.responded ? (
-                    <Button size="sm">Respond</Button>
-                ) : (
-                    <Button variant="outline" size="sm">Edit Response</Button>
-                )}
-            </CardFooter>
-        </Card>
+
+                setUser(response.data.data);
+                console.log(response.data.data)
+            } catch (err)
+            {
+                console.error('Error fetching user:', err);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    const lecturerEmail = user.email;
+    console.log(lecturerEmail)
+
+    const filteredReviews = reviews.filter(
+        review => review.lecturerEmail === lecturerEmail
     );
+
+
+    useEffect(() =>
+    {
+        const fetchreviewsDetails = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/users/getreviewbyemail`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+
+
+
+                setreviews(res.data.data);
+                console.log(res.data.data)
+            } catch (err)
+            {
+                console.error("Error fetching reviews:", err);
+            } finally
+            {
+                setLoading(false);
+            }
+        };
+
+
+
+        fetchreviewsDetails();
+
+    }, []);
+
+    const [reviewsDataDetails, setReviewsDataDetails] = useState({
+        average: 0,
+        total: 0,
+        reviews: [],
+    });
+
+    useEffect(() =>
+    {
+        const fetchReviews = async () =>
+        {
+            try
+            {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/users/getreviewbyemail/${encodeURIComponent(lecturerEmail)}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setReviewsDataDetails({
+                    average: res.data.average,
+                    total: res.data.total,
+                    reviews: res.data.data,
+                });
+            } catch (err)
+            {
+                console.error("Error fetching reviews:", err);
+            } finally
+            {
+                setLoading(false);
+            }
+        };
+
+        if (lecturerEmail)
+        {
+            setLoading(true);
+            fetchReviews();
+        }
+    }, [lecturerEmail]);
+
+
+
+    // Helper function to render review cards
+
 
     return (
         <div className="flex min-h-screen bg-gray-50">
@@ -254,11 +322,11 @@ export default function ReviewsPage()
                         </CardHeader>
                         <CardContent className="pb-4">
                             <div className="flex flex-col items-center">
-                                <div className="text-5xl font-bold text-blue-600 mb-1">{reviewsData.average}</div>
+                                <div className="text-5xl font-bold text-blue-600 mb-1">{Number(reviewsDataDetails.average).toFixed(1)}</div>
                                 <div className="flex mb-2">
-                                    {renderStars(Math.round(reviewsData.average))}
+                                    {renderStars(Math.round(reviewsDataDetails.average))}
                                 </div>
-                                <p className="text-gray-500">{reviewsData.total} total reviews</p>
+                                <p className="text-gray-500 font-bold">{reviewsDataDetails.total} total reviews</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -337,109 +405,62 @@ export default function ReviewsPage()
                     </Card>
                 </div>
 
-                {/* Reviews Filters */}
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                            placeholder="Search reviews..."
-                            className="pl-10"
-                        />
-                    </div>
 
-                    <div className="flex gap-3">
-                        <Select defaultValue={filterRating} onValueChange={setFilterRating}>
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Filter by rating" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Ratings</SelectItem>
-                                <SelectItem value="5">5 Stars</SelectItem>
-                                <SelectItem value="4">4 Stars</SelectItem>
-                                <SelectItem value="3">3 Stars</SelectItem>
-                                <SelectItem value="2">2 Stars</SelectItem>
-                                <SelectItem value="1">1 Star</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <Select defaultValue={sortBy} onValueChange={setSortBy}>
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Sort by" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="recent">Most Recent</SelectItem>
-                                <SelectItem value="oldest">Oldest First</SelectItem>
-                                <SelectItem value="highest">Highest Rated</SelectItem>
-                                <SelectItem value="lowest">Lowest Rated</SelectItem>
-                                <SelectItem value="helpful">Most Helpful</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        <Button variant="outline" className="flex items-center gap-2">
-                            <Filter size={16} />
-                            Filter
-                        </Button>
-                    </div>
-                </div>
 
                 {/* Reviews Tabs */}
                 <Tabs defaultValue="all" className="mb-6">
-                    <TabsList className="grid grid-cols-3 w-full max-w-md mb-6">
-                        <TabsTrigger value="all">
-                            All Reviews
-                            <Badge variant="secondary" className="ml-2 bg-gray-100">
-                                {reviewsData.total}
-                            </Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="needs-response">
-                            Needs Response
-                            <Badge variant="secondary" className="ml-2 bg-amber-100 text-amber-700">
-                                {reviewsData.needResponse.length}
-                            </Badge>
-                        </TabsTrigger>
-                        <TabsTrigger value="critical">
-                            Critical Reviews
-                            <Badge variant="secondary" className="ml-2 bg-red-100 text-red-700">
-                                {reviewsData.critical.length}
-                            </Badge>
-                        </TabsTrigger>
-                    </TabsList>
+
 
                     <TabsContent value="all" className="space-y-4">
-                        {reviewsData.recent.map(review => renderReviewCard(review))}
+                        {filteredReviews.map((review) =>
+                        {
+                            return (
+                                <Card key={review._id} className="mb-4">
+                                    <CardHeader className="pb-2">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={`http://localhost:5000${review.profileImage}`} alt={review.loggedUserName} />
+
+                                                    {console.log(review.profileImage)}
+                                                    <AvatarFallback>
+                                                        {review.loggedUserName?.split(' ').map(n => n[0]).join('')}
+                                                    </AvatarFallback>
+                                                </Avatar>
+
+                                                <div>
+                                                    <p className="font-medium">{review.loggedUserName}</p>
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <div className="flex">
+                                                            {renderStars(review.starCount)}
+                                                        </div>
+                                                        <span className="text-gray-500 text-sm">
+                                                            {new Date(review.createdAt).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50">
+                                                {review.lecturerEmail}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+
+                                    <CardContent className="pb-3">
+                                        <p className="text-gray-700">{review.description}</p>
+                                    </CardContent>
+
+
+                                </Card>
+                            )
+                        })}
 
                         <div className="flex justify-center mt-8">
                             <Button variant="outline">Load More Reviews</Button>
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="needs-response" className="space-y-4">
-                        {reviewsData.needResponse.length > 0 ? (
-                            reviewsData.needResponse.map(review => renderReviewCard(review))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
-                                <h3 className="text-xl font-medium mb-2">All caught up!</h3>
-                                <p className="text-gray-500 max-w-md">
-                                    You've responded to all student reviews. Great job engaging with your students!
-                                </p>
-                            </div>
-                        )}
-                    </TabsContent>
 
-                    <TabsContent value="critical" className="space-y-4">
-                        {reviewsData.critical.length > 0 ? (
-                            reviewsData.critical.map(review => renderReviewCard(review))
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
-                                <h3 className="text-xl font-medium mb-2">No critical reviews</h3>
-                                <p className="text-gray-500 max-w-md">
-                                    You don't have any reviews with 3 stars or lower. Keep up the excellent work!
-                                </p>
-                            </div>
-                        )}
-                    </TabsContent>
                 </Tabs>
             </div>
         </div>

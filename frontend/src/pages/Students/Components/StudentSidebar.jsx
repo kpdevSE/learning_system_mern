@@ -155,7 +155,7 @@ export default function StudentSidebar()
                 <div className="flex h-full flex-col">
                     {/* Header */}
                     <div className="flex h-16 items-center justify-between px-4">
-                        <div className="font-semibold text-lg">Learning Portal</div>
+                        <div className="font-semibold text-lg"> <span className="text-2xl font-bold text-black">English Learning</span></div>
 
                         {/* Mobile Close Button */}
                         {isMobileView && (

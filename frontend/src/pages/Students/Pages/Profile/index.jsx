@@ -173,7 +173,7 @@ export default function StudentProfilePage()
                                     ) : (
                                         <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
                                     )}
-                                    <AvatarFallback>{user?.name.charAt(0) || "U"}</AvatarFallback>
+                                    {/* <AvatarFallback>{user.name.charAt(0) || "U"}</AvatarFallback> */}
                                 </Avatar>
                                 <div>
                                     <CardTitle>{loggedUser?.name}</CardTitle>
