@@ -89,3 +89,27 @@ exports.getteacherProfile = async (req, res) =>
         );
     }
 }
+
+
+exports.getteacherProfiles = async (req, res) => 
+{
+    try
+    {
+        const user = await TeacherProfile.find();
+
+        res.status(200).json(
+            {
+                success: true,
+                data: user
+            }
+        )
+    } catch (error)
+    {
+        console.error('Get current user error:', error);
+        res.status(500).json(
+            {
+                message: 'Server error', error: error.message
+            }
+        );
+    }
+}

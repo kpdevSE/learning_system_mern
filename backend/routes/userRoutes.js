@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { getCurrentUser, updateUserProfile, getStudentCount } = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
-const { getteacherProfile, addProfile } = require('../controllers/teacherProfileController');
+const { getteacherProfile, addProfile, getteacherProfiles } = require('../controllers/teacherProfileController');
 const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents, getCoursesCount } = require('../controllers/courseController');
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
 const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer } = require('../controllers/payementController');
 const { getNotificationsByRole, sendNotification, getStudentNotificationCount, getteachersNotificationsCount } = require('../controllers/notificationsController');
 const { uploadPDF, getAllPDFs, deletePDF, getAllPDFsByEmail } = require('../controllers/pdfController');
 const { createReview, getLecturerReviews, getAllReviews, getLecturerReviewsDetails } = require('../controllers/reviewsController');
+const { createBooking, getMyBookings, deleteBooking, getLecturerBookings, getLecturerBookingsByEmail, updateBookingStatus } = require('../controllers/bookingController');
 
 
 // Protected routes
@@ -55,4 +56,16 @@ router.get('/pdfbyemail', getAllPDFsByEmail);
 router.post('/addreviews', createReview);
 router.get('/getreviewbyemail', getAllReviews)
 router.get('/getreviewbyemail/:id', getLecturerReviewsDetails)
+
+// Lecturer Profiles
+router.get('/getteacherprofiles', getteacherProfiles)
+
+// Booking 
+router.post('/postbooking', createBooking);
+router.get('/getbookings', getMyBookings);
+router.delete('/deletebooking/:id', deleteBooking)
+router.get('/getLecturerbookings', getLecturerBookingsByEmail)
+
+
+
 module.exports = router;

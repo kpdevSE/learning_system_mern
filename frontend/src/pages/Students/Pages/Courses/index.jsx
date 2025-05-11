@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, CreditCard, Filter, Plus, Search as SearchIcon, Star, StarHalfIcon, StarIcon, Users } from "lucide-react";
+import { Calendar, CheckCircle, CreditCard, Filter, Plus, Search as SearchIcon, Star, StarHalfIcon, StarIcon, Users } from "lucide-react";
 import axios from "axios";
 import PurchaseComponent from "@/components/ui/Components/PurchaseComponent";
 import PlayerComponent from "@/components/ui/Components/Player";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import BookALecturer from "../../Components/BookALecturer";
 
 
 
@@ -260,6 +261,10 @@ export default function Courses()
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
                         <p className="text-muted-foreground">Manage your enrolled courses and discover new ones</p>
+                    </div>
+                    <div>
+                        <BookALecturer />
+
                     </div>
                 </div>
 

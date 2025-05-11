@@ -21,7 +21,6 @@ export default function StudentSidebar()
         { icon: BookOpen, name: "My Courses", path: "/student/courses" },
         { icon: FileText, name: "Course Materials", path: "/student/course-materials" },
         { icon: FileText, name: "Assignments", path: "/student/assignments" },
-        { icon: Bell, name: "Notifications", path: "/student/notifications" },
         { icon: CreditCard, name: "Payments", path: "/student/payments" },
     ];
 
