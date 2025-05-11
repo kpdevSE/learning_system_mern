@@ -203,6 +203,8 @@ exports.deleteBooking = async (req, res) =>
     {
         const booking = await Booking.findById(req.params.id);
 
+        console.log("Booking:", booking);
+
         if (!booking)
         {
             return res.status(404).json({
@@ -220,7 +222,7 @@ exports.deleteBooking = async (req, res) =>
             });
         }
 
-        await booking.remove();
+        await booking.deleteOne();
 
         res.status(200).json({
             success: true,
@@ -228,6 +230,7 @@ exports.deleteBooking = async (req, res) =>
         });
     } catch (error)
     {
+        console.error("Error in deleteBooking:", error); // log the full error
         res.status(500).json({
             success: false,
             message: 'Server error',

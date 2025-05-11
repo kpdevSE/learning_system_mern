@@ -302,11 +302,12 @@ export default function LecturerBookingSystem()
         {
             if (!bookingToCancel) return;
 
+            console.log("Booking to cancel:", bookingToCancel._id);
+
             const token = localStorage.getItem('token');
             if (!token) return;
 
-            await axios.put(`http://localhost:5000/api/users/deletebooking/${bookingToCancel._id}`,
-                { status: 'cancelled' },
+            await axios.delete(`http://localhost:5000/api/users/deletebooking/${bookingToCancel._id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -317,9 +318,24 @@ export default function LecturerBookingSystem()
             // Refresh bookings
             fetchMyBookings();
             setCancelDialogOpen(false);
+
+            window.location.reload();
         } catch (error)
         {
             console.error("Error cancelling booking:", error);
+            if (error.response)
+            {
+                // Backend responded with an error
+                console.error("Server responded with error:", error.response.data);
+            } else if (error.request)
+            {
+                // No response received
+                console.error("No response from server:", error.request);
+            } else
+            {
+                // Other error (e.g. setup)
+                console.error("Axios setup error:", error.message);
+            }
         }
     };
 
