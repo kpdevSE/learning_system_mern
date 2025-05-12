@@ -217,30 +217,37 @@ export default function Bookings()
     };
 
     // Get highlighted days for calendar
+    // const getHighlightedDays = () =>
+    // {
+    //     const highlightedDays = [];
+    //     const allDateBookings = [...bookings.upcoming, ...bookings.pending];
+
+    //     allDateBookings.forEach(booking =>
+    //     {
+    //         if (booking.date)
+    //         {
+    //             const bookingDate = new Date(booking.date);
+    //             highlightedDays.push(bookingDate.getDate());
+    //         }
+    //     });
+
+    //     return highlightedDays;
+    // };
+
     const getHighlightedDays = () =>
     {
-        const highlightedDays = [];
-        const allDateBookings = [...bookings.upcoming, ...bookings.pending];
-
-        allDateBookings.forEach(booking =>
-        {
-            if (booking.date)
-            {
-                const bookingDate = new Date(booking.date);
-                highlightedDays.push(bookingDate.getDate());
-            }
-        });
-
-        return highlightedDays;
+        const confirmedBookings = bookings.upcoming; // Already filtered as confirmed
+        const days = confirmedBookings.map(b => new Date(b.date));
+        return days;
     };
 
     // Get sessions for selected date
     const getSessionsForDate = (selectedDate) =>
     {
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-        const allBookings = [...bookings.upcoming, ...bookings.pending];
+        // const allBookings = [...bookings.upcoming, ...bookings.pending];
 
-        return allBookings.filter(booking => booking.formattedDate === formattedDate);
+        return bookings.upcoming.filter(booking => booking.formattedDate === formattedDate);
     };
 
     return (
@@ -398,7 +405,7 @@ export default function Bookings()
                         <Card>
                             <CardHeader>
                                 <CardTitle>Calendar View</CardTitle>
-                                <CardDescription>Your teaching schedule</CardDescription>
+                                <CardDescription>Your confirmed teaching sessions</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Calendar
@@ -406,10 +413,15 @@ export default function Bookings()
                                     selected={date}
                                     onSelect={setDate}
                                     className="rounded-md border"
-                                    highlightedDays={getHighlightedDays()}
+                                    modifiers={{
+                                        booked: getHighlightedDays(),
+                                    }}
+                                    modifiersClassNames={{
+                                        booked: 'bg-green-200 text-green-900 font-semibold rounded-full',
+                                    }}
                                 />
                                 <div className="mt-4">
-                                    <h4 className="font-medium mb-2">Sessions on {format(date, 'MMMM d, yyyy')}</h4>
+                                    <h4 className="font-medium mb-2">Confirmed Sessions on {format(date, 'MMMM d, yyyy')}</h4>
                                     <div className="space-y-2">
                                         {getSessionsForDate(date).length > 0 ? (
                                             getSessionsForDate(date).map(booking => (
@@ -422,7 +434,7 @@ export default function Bookings()
                                                 </div>
                                             ))
                                         ) : (
-                                            <p className="text-sm text-muted-foreground">No sessions scheduled</p>
+                                            <p className="text-sm text-muted-foreground">No confirmed sessions</p>
                                         )}
                                     </div>
                                 </div>
@@ -430,111 +442,7 @@ export default function Bookings()
                         </Card>
                     </div>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Manage Availability</CardTitle>
-                            <CardDescription>Set your teaching hours and breaks</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div>
-                                    <h4 className="text-sm font-medium mb-2">Day</h4>
-                                    <Select
-                                        value={newTimeSlot.day}
-                                        onValueChange={(value) => setNewTimeSlot({ ...newTimeSlot, day: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select day" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="monday">Monday</SelectItem>
-                                            <SelectItem value="tuesday">Tuesday</SelectItem>
-                                            <SelectItem value="wednesday">Wednesday</SelectItem>
-                                            <SelectItem value="thursday">Thursday</SelectItem>
-                                            <SelectItem value="friday">Friday</SelectItem>
-                                            <SelectItem value="saturday">Saturday</SelectItem>
-                                            <SelectItem value="sunday">Sunday</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-medium mb-2">Start Time</h4>
-                                    <Select
-                                        value={newTimeSlot.startTime}
-                                        onValueChange={(value) => setNewTimeSlot({ ...newTimeSlot, startTime: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Start time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Array.from({ length: 14 }, (_, i) => i + 8).map(hour => (
-                                                <SelectItem key={hour} value={hour.toString()}>
-                                                    {hour}:00
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-medium mb-2">End Time</h4>
-                                    <Select
-                                        value={newTimeSlot.endTime}
-                                        onValueChange={(value) => setNewTimeSlot({ ...newTimeSlot, endTime: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="End time" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {Array.from({ length: 14 }, (_, i) => i + 8).map(hour => (
-                                                <SelectItem key={hour} value={hour.toString()}>
-                                                    {hour}:00
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="flex items-end">
-                                    <Button className="w-full bg-black hover:bg-black" onClick={handleAddTimeSlot}>
-                                        Add Time Slot
-                                    </Button>
-                                </div>
-                            </div>
 
-                            <div className="mt-6">
-                                <h4 className="text-sm font-medium mb-2">Current Weekly Schedule</h4>
-                                <div className="border rounded-md overflow-hidden">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="bg-slate-100">
-                                                <th className="text-left p-2 text-sm font-medium">Day</th>
-                                                <th className="text-left p-2 text-sm font-medium">Hours</th>
-                                                <th className="text-left p-2 text-sm font-medium">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {timeSlots.map((slot, index) => (
-                                                <tr key={index} className="border-t">
-                                                    <td className="p-2 text-sm">{slot.day}</td>
-                                                    <td className="p-2 text-sm">{slot.hours}</td>
-                                                    <td className="p-2 text-sm">
-                                                        <Button variant="ghost" size="sm">Edit</Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="text-red-600"
-                                                            onClick={() => handleRemoveTimeSlot(index)}
-                                                        >
-                                                            Remove
-                                                        </Button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
 
@@ -638,3 +546,5 @@ export default function Bookings()
         </div>
     );
 }
+
+
