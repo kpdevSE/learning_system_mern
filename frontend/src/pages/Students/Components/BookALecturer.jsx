@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import
@@ -11,7 +12,7 @@ import
     DrawerTitle,
     DrawerTrigger
 } from "@/components/ui/drawer";
-import { Calendar, Clock, Mail, Bookmark, Check, X, RefreshCw } from "lucide-react";
+import { Calendar, Clock, Mail, Bookmark, Check, X, RefreshCw, MapPin, Phone, Cake, User, GraduationCap } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import
 {
@@ -80,6 +81,7 @@ export default function LecturerBookingSystem()
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [bookingToCancel, setBookingToCancel] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
+    const [lecturerDetailsOpen, setLecturerDetailsOpen] = useState(false);
 
     // Fetch teacher profiles from API
     useEffect(() =>
@@ -168,10 +170,11 @@ export default function LecturerBookingSystem()
         }
     };
 
-    // Filter out only lecturers (users with valid department and specialization)
+    // Filter out only lecturers (users with valid fields)
     const lecturers = users.filter(user =>
         user.department &&
         user.spcialization &&
+        user.educationLevel &&
         user.department !== "undefined" &&
         user.spcialization !== "undefined"
     ).map(lecturer => ({
@@ -181,14 +184,25 @@ export default function LecturerBookingSystem()
         specialization: [lecturer.spcialization], // Wrap in array since your UI expects an array
         email: lecturer.lecturerEmail || "No email provided",
         bio: lecturer.bio || "",
-        image: lecturer.profileImage || "/api/placeholder/150/150"
+        image: lecturer.profileImage || "/api/placeholder/150/150",
+        // New fields
+        campus: lecturer.campus || "",
+        liveLocation: lecturer.liveLocation || "",
+        mobileNumber: lecturer.mobileNumber || "",
+        birthday: lecturer.birthday ? new Date(lecturer.birthday) : null,
+        gender: lecturer.gender || "",
+        nicNumber: lecturer.nicNumber || "",
+        age: lecturer.age || 0,
+        educationLevel: lecturer.educationLevel || ""
     }));
 
-    const departments = [...new Set(lecturers.map(l => l.department))];
+    // Get all education levels for filtering
+    const educationLevels = [...new Set(lecturers.map(l => l.educationLevel))];
 
+    // Filter by education level instead of department
     const filteredLecturers = filter === "all"
         ? lecturers
-        : lecturers.filter(l => l.department === filter);
+        : lecturers.filter(l => l.educationLevel === filter);
 
     const handleBooking = (lecturer) =>
     {
@@ -200,6 +214,12 @@ export default function LecturerBookingSystem()
             topic: "",
             platform: "zoom"
         });
+    };
+
+    const showLecturerDetails = (lecturer) =>
+    {
+        setSelectedLecturer(lecturer);
+        setLecturerDetailsOpen(true);
     };
 
     const handleInputChange = (e) =>
@@ -348,6 +368,13 @@ export default function LecturerBookingSystem()
         }
     }, [myBookingsOpen]);
 
+    // Format birthday
+    const formatBirthday = (date) =>
+    {
+        if (!date) return "Not provided";
+        return format(new Date(date), 'MMM dd, yyyy');
+    };
+
     return (
         <div className="w-full">
             {/* Book a Lecturer Drawer */}
@@ -366,7 +393,7 @@ export default function LecturerBookingSystem()
                         <Clock className="h-4 w-4" />My Bookings
                     </Button>
                 </div>
-                <DrawerContent className="max-h-[90vh] overflow-y-auto">
+                <DrawerContent className="h-full overflow-y-auto">
                     <div className="mx-auto w-full max-w-4xl">
                         <DrawerHeader>
                             <DrawerTitle className="text-2xl font-bold">Book a Lecturer</DrawerTitle>
@@ -381,12 +408,12 @@ export default function LecturerBookingSystem()
                                 </div>
                                 <Select value={filter} onValueChange={setFilter}>
                                     <SelectTrigger className="w-48">
-                                        <SelectValue placeholder="Filter by department" />
+                                        <SelectValue placeholder="Filter by education level" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Departments</SelectItem>
-                                        {departments.map((dept) => (
-                                            <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                                        <SelectItem value="all">All Education Levels</SelectItem>
+                                        {educationLevels.map((level) => (
+                                            <SelectItem key={level} value={level}>{level}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -401,7 +428,7 @@ export default function LecturerBookingSystem()
                             ) : filteredLecturers.length === 0 ? (
                                 <div className="flex justify-center items-center h-40">
                                     <div className="text-center">
-                                        <p className="text-gray-500">No lecturers found in this department.</p>
+                                        <p className="text-gray-500">No lecturers found with this education level.</p>
                                     </div>
                                 </div>
                             ) : (
@@ -426,6 +453,10 @@ export default function LecturerBookingSystem()
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="pb-2">
+                                                <div className="flex items-center text-sm text-gray-600 mb-2">
+                                                    <GraduationCap className="h-3 w-3 mr-1" />
+                                                    <span>{lecturer.educationLevel}</span>
+                                                </div>
                                                 <div className="flex flex-wrap gap-1 mb-2">
                                                     {lecturer.specialization.map((spec, i) => (
                                                         <Badge key={i} variant="secondary" className="text-xs">{spec}</Badge>
@@ -434,20 +465,32 @@ export default function LecturerBookingSystem()
                                                 {lecturer.bio && (
                                                     <p className="text-sm text-gray-600 mb-2 line-clamp-2">{lecturer.bio}</p>
                                                 )}
-                                                <div className="flex items-center text-sm text-gray-500">
+                                                <div className="flex items-center text-sm text-gray-500 mb-1">
                                                     <Mail className="h-3 w-3 mr-1" />
                                                     <span>{lecturer.email}</span>
                                                 </div>
+                                                <div className="flex items-center text-sm text-gray-500">
+                                                    <MapPin className="h-3 w-3 mr-1" />
+                                                    <span>{lecturer.campus}</span>
+                                                </div>
                                             </CardContent>
-                                            <CardFooter className="pt-0">
+                                            <CardFooter className="pt-0 flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="flex-1"
+                                                    onClick={() => showLecturerDetails(lecturer)}
+                                                >
+                                                    View Details
+                                                </Button>
                                                 <Button
                                                     variant="secondary"
                                                     size="sm"
-                                                    className="w-full mt-2"
+                                                    className="flex-1"
                                                     onClick={() => handleBooking(lecturer)}
                                                 >
-                                                    <Bookmark className="h-4 w-4 mr-2" />
-                                                    Book Consultation
+                                                    <Bookmark className="h-4 w-4 mr-1" />
+                                                    Book
                                                 </Button>
                                             </CardFooter>
                                         </Card>
@@ -463,6 +506,130 @@ export default function LecturerBookingSystem()
                     </div>
                 </DrawerContent>
             </Drawer>
+
+            {/* Lecturer Details Dialog */}
+            <Dialog open={lecturerDetailsOpen} onOpenChange={setLecturerDetailsOpen}>
+                {selectedLecturer && (
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Lecturer Profile</DialogTitle>
+                            <DialogDescription>
+                                Detailed information about {selectedLecturer.name}
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="flex flex-col items-center py-2">
+                            <Avatar className="h-24 w-24 border mb-3">
+                                <AvatarImage
+                                    src={selectedLecturer.image.startsWith("/uploads")
+                                        ? `http://localhost:5000${selectedLecturer.image}`
+                                        : selectedLecturer.image}
+                                    alt={selectedLecturer.name}
+                                />
+                                <AvatarFallback>{selectedLecturer.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <h2 className="text-xl font-bold">{selectedLecturer.name}</h2>
+                            <p className="text-gray-500">{selectedLecturer.department}</p>
+                        </div>
+
+                        <div className="grid gap-3">
+                            <div className="bg-gray-50 p-3 rounded border border-gray-100">
+                                <h3 className="font-medium mb-1">About</h3>
+                                <p className="text-sm text-gray-700">{selectedLecturer.bio}</p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="text-sm">
+                                    <p className="font-medium">Education Level</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <GraduationCap className="h-3 w-3 mr-1" />
+                                        {selectedLecturer.educationLevel}
+                                    </p>
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-medium">Gender</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <User className="h-3 w-3 mr-1" />
+                                        {selectedLecturer.gender}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="text-sm">
+                                    <p className="font-medium">Campus</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        {selectedLecturer.campus}
+                                    </p>
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-medium">Age</p>
+                                    <p className="text-gray-600">
+                                        {selectedLecturer.age || "Not provided"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-2">
+                                <div className="text-sm">
+                                    <p className="font-medium">Address</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        {selectedLecturer.liveLocation}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="text-sm">
+                                    <p className="font-medium">Mobile</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <Phone className="h-3 w-3 mr-1" />
+                                        {selectedLecturer.mobileNumber}
+                                    </p>
+                                </div>
+                                <div className="text-sm">
+                                    <p className="font-medium">Birthday</p>
+                                    <p className="text-gray-600 flex items-center">
+                                        <Cake className="h-3 w-3 mr-1" />
+                                        {formatBirthday(selectedLecturer.birthday)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="text-sm">
+                                <p className="font-medium">NIC Number</p>
+                                <p className="text-gray-600">
+                                    {selectedLecturer.nicNumber}
+                                </p>
+                            </div>
+
+                            <div className="text-sm">
+                                <p className="font-medium">Specialization</p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {selectedLecturer.specialization.map((spec, i) => (
+                                        <Badge key={i} variant="secondary" className="text-xs">{spec}</Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="gap-2">
+                            <Button variant="outline" onClick={() => setLecturerDetailsOpen(false)}>
+                                Close
+                            </Button>
+                            <Button onClick={() =>
+                            {
+                                setLecturerDetailsOpen(false);
+                                handleBooking(selectedLecturer);
+                            }}>
+                                Book Consultation
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                )}
+            </Dialog>
 
             {/* Booking Dialog */}
             <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
@@ -488,10 +655,9 @@ export default function LecturerBookingSystem()
                             <div>
                                 <h3 className="font-medium">{selectedLecturer.name}</h3>
                                 <p className="text-sm text-gray-500">{selectedLecturer.department}</p>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {selectedLecturer.specialization.map((spec) => (
-                                        <Badge key={spec} variant="outline" className="text-xs">{spec}</Badge>
-                                    ))}
+                                <div className="flex items-center text-sm text-gray-600">
+                                    <GraduationCap className="h-3 w-3 mr-1" />
+                                    <span>{selectedLecturer.educationLevel}</span>
                                 </div>
                             </div>
                         </div>
@@ -647,85 +813,86 @@ export default function LecturerBookingSystem()
                         </Button>
                     </div>
 
-                    {bookingsLoading ? (
-                        <div className="flex justify-center items-center h-40">
-                            <div className="text-center">
-                                <p className="text-gray-500">Loading bookings...</p>
+                    {
+                        bookingsLoading ? (
+                            <div className="flex justify-center items-center h-40">
+                                <div className="text-center">
+                                    <p className="text-gray-500">Loading bookings...</p>
+                                </div>
                             </div>
-                        </div>
-                    ) : bookings.length === 0 ? (
-                        <div className="flex justify-center items-center h-40">
-                            <div className="text-center">
-                                <p className="text-gray-500">You don't have any bookings yet.</p>
+                        ) : bookings.length === 0 ? (
+                            <div className="flex justify-center items-center h-40">
+                                <div className="text-center">
+                                    <p className="text-gray-500">You don't have any bookings yet.</p>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-4">
-                            {bookings.map((booking) =>
-                            {
-                                // Format the date
-                                const bookingDate = new Date(booking.date);
-                                const formattedDate = bookingDate ?
-                                    format(bookingDate, 'MMM dd, yyyy') : 'Invalid date';
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4">
+                                {bookings.map((booking) =>
+                                {
+                                    // Format the date
+                                    const bookingDate = new Date(booking.date);
+                                    const formattedDate = bookingDate ?
+                                        format(bookingDate, 'MMM dd, yyyy') : 'Invalid date';
 
-                                return (
-                                    <Card key={booking._id} className="overflow-hidden">
-                                        <CardHeader className="pb-2">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <CardTitle className="text-lg">{booking.lecturerName}</CardTitle>
-                                                    <CardDescription>{booking.department}</CardDescription>
+                                    return (
+                                        <Card key={booking._id} className="overflow-hidden">
+                                            <CardHeader className="pb-2">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <CardTitle className="text-lg">{booking.lecturerName}</CardTitle>
+                                                        <CardDescription>{booking.department}</CardDescription>
+                                                    </div>
+                                                    <Badge
+                                                        variant={
+                                                            booking.status === 'confirmed' ? 'default' :
+                                                                booking.status === 'cancelled' ? 'destructive' :
+                                                                    booking.status === 'completed' ? 'outline' : 'secondary'
+                                                        }
+                                                        className="uppercase text-xs"
+                                                    >
+                                                        {booking.status}
+                                                    </Badge>
                                                 </div>
-                                                <Badge
-                                                    variant={
-                                                        booking.status === 'confirmed' ? 'default' :
-                                                            booking.status === 'cancelled' ? 'destructive' :
-                                                                booking.status === 'completed' ? 'outline' : 'secondary'
-                                                    }
-                                                    className="uppercase text-xs"
-                                                >
-                                                    {booking.status}
-                                                </Badge>
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="pb-2">
-                                            <div className="grid grid-cols-2 gap-2 mb-3">
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Calendar className="h-3 w-3 mr-2" />
-                                                    {formattedDate}
+                                            </CardHeader>
+                                            <CardContent className="pb-2">
+                                                <div className="grid grid-cols-2 gap-2 mb-3">
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Calendar className="h-3 w-3 mr-2" />
+                                                        {formattedDate}
+                                                    </div>
+                                                    <div className="flex items-center text-sm text-gray-600">
+                                                        <Clock className="h-3 w-3 mr-2" />
+                                                        {booking.time}
+                                                    </div>
                                                 </div>
-                                                <div className="flex items-center text-sm text-gray-600">
-                                                    <Clock className="h-3 w-3 mr-2" />
-                                                    {booking.time}
+                                                <div className="mb-2">
+                                                    <Badge variant="outline">
+                                                        {booking.consultationType === 'in-person' ? 'In-Person' : 'Virtual'}
+                                                        {booking.consultationType === 'virtual' && booking.platform && ` - ${booking.platform}`}
+                                                    </Badge>
                                                 </div>
-                                            </div>
-                                            <div className="mb-2">
-                                                <Badge variant="outline">
-                                                    {booking.consultationType === 'in-person' ? 'In-Person' : 'Virtual'}
-                                                    {booking.consultationType === 'virtual' && booking.platform && ` - ${booking.platform}`}
-                                                </Badge>
-                                            </div>
-                                            <p className="text-sm font-medium">Topic:</p>
-                                            <p className="text-sm text-gray-600">{booking.topic}</p>
-                                        </CardContent>
-                                        <CardFooter className="pt-0">
-                                            {booking.status === 'pending' && (
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    className="w-full mt-2"
-                                                    onClick={() => handleCancelBooking(booking)}
-                                                >
-                                                    <X className="h-4 w-4 mr-2" />
-                                                    Cancel Booking
-                                                </Button>
-                                            )}
-                                        </CardFooter>
-                                    </Card>
-                                );
-                            })}
-                        </div>
-                    )}
+                                                <p className="text-sm font-medium">Topic:</p>
+                                                <p className="text-sm text-gray-600">{booking.topic}</p>
+                                            </CardContent>
+                                            <CardFooter className="pt-0">
+                                                {booking.status === 'pending' && (
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        className="w-full mt-2"
+                                                        onClick={() => handleCancelBooking(booking)}
+                                                    >
+                                                        <X className="h-4 w-4 mr-2" />
+                                                        Cancel Booking
+                                                    </Button>
+                                                )}
+                                            </CardFooter>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        )}
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setMyBookingsOpen(false)}>

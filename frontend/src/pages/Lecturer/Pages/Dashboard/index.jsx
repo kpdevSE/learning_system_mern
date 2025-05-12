@@ -38,7 +38,7 @@ export default function LecturerDashboard()
     const [loading, setLoading] = useState(false);
     const [notificationCount, setNotificationsCount] = useState()
     const [user, setUser] = useState({})
-
+    const [payementCount, setPayementCount] = useState()
 
     // Get Notifications Count
     useEffect(() =>

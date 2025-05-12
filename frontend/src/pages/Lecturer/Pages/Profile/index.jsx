@@ -19,7 +19,14 @@ export default function ProfilePage()
     const [user, setUser] = useState({})
     const [loggedUser, setLoggedUser] = useState({})
     const [loading, setLoading] = useState(false);
-
+    const [campus, setCampus] = useState('');
+    const [liveLocation, setLiveLocation] = useState('');
+    const [mobileNumber, setMobileNumber] = useState('');
+    const [birthday, setBirthday] = useState('');
+    const [gender, setGender] = useState('');
+    const [nicNumber, setNicNumber] = useState('');
+    const [age, setAge] = useState('');
+    const [educationLevel, setEducationLevel] = useState('');
     const [profileImage, setProfileImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
 
@@ -57,7 +64,15 @@ export default function ProfilePage()
         formData.append('bio', bio);
         formData.append('spcialization', spcialization);
         formData.append('department', department);
-        formData.append('profileImage', profileImage); // This is the actual File object
+        formData.append('profileImage', profileImage);
+        formData.append('campus', campus);
+        formData.append('liveLocation', liveLocation);
+        formData.append('mobileNumber', mobileNumber);
+        formData.append('birthday', birthday); // ISO string or YYYY-MM-DD
+        formData.append('gender', gender);
+        formData.append('nicNumber', nicNumber);
+        formData.append('age', age);
+        formData.append('educationLevel', educationLevel);
 
         try
         {
@@ -161,7 +176,7 @@ export default function ProfilePage()
                             <Card>
                                 <CardHeader className="flex flex-row items-center gap-4">
                                     <Avatar className="h-16 w-16">
-                                        {user && user.profileImage ? (
+                                        {user?.profileImage ? (
                                             <AvatarImage
                                                 src={`http://localhost:5000${user.profileImage}`}
                                                 alt={user.name || "Profile"}
@@ -172,12 +187,13 @@ export default function ProfilePage()
                                         <AvatarFallback>{loggedUser?.name?.charAt(0) || "U"}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <CardTitle className="text-2xl">{loggedUser?.name}</CardTitle>
-                                        <CardDescription>{loggedUser?.email}</CardDescription>
+                                        <CardTitle className="text-2xl">{user?.name}</CardTitle>
+                                        <CardDescription>{user?.lecturerEmail}</CardDescription>
                                     </div>
                                 </CardHeader>
+
                                 {user ? (
-                                    <CardContent className="space-y-4">
+                                    <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-800 mt-4">
                                         <div>
                                             <h3 className="font-medium text-gray-500">Department</h3>
                                             <p>{user.department}</p>
@@ -188,17 +204,50 @@ export default function ProfilePage()
                                         </div>
                                         <div>
                                             <h3 className="font-medium text-gray-500">Bio</h3>
-                                            <p className="text-gray-700">{user.bio}</p>
+                                            <p>{user.bio}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Campus</h3>
+                                            <p>{user.campus}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Live Location</h3>
+                                            <p>{user.liveLocation}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Mobile Number</h3>
+                                            <p>{user.mobileNumber}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Birthday</h3>
+                                            <p>{new Date(user.birthday).toLocaleDateString()}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Gender</h3>
+                                            <p>{user.gender}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">NIC Number</h3>
+                                            <p>{user.nicNumber}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Age</h3>
+                                            <p>{user.age}</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-medium text-gray-500">Education Level</h3>
+                                            <p>{user.educationLevel}</p>
                                         </div>
                                     </CardContent>
                                 ) : (
-                                    <div className="font-semibold text-xl text-red-500 text-center">
-                                        <p>Please Navigate to Profile Edit tab and Update Your Profile </p>
+                                    <div className="font-semibold text-xl text-red-500 text-center p-6">
+                                        <p>Please navigate to the Profile Edit tab and update your profile.</p>
                                     </div>
                                 )}
-
                             </Card>
                         </TabsContent>
+
+
 
                         <TabsContent value="edit">
                             <Card>
@@ -235,6 +284,109 @@ export default function ProfilePage()
                                                     value={spcialization}
                                                     onChange={(e) => setSpcialization(e.target.value)}
                                                 />
+                                            </div>
+
+                                            {/* Campus Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="campus">Campus (Higher Education)</Label>
+                                                <Input
+                                                    id="campus"
+                                                    name="campus"
+                                                    value={campus}
+                                                    onChange={(e) => setCampus(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Live Location Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="liveLocation">Live Location</Label>
+                                                <Input
+                                                    id="liveLocation"
+                                                    name="liveLocation"
+                                                    value={liveLocation}
+                                                    onChange={(e) => setLiveLocation(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Mobile Number Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="mobileNumber">Mobile Number</Label>
+                                                <Input
+                                                    id="mobileNumber"
+                                                    name="mobileNumber"
+                                                    value={mobileNumber}
+                                                    onChange={(e) => setMobileNumber(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Birthday Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="birthday">Birthday</Label>
+                                                <Input
+                                                    id="birthday"
+                                                    name="birthday"
+                                                    type="date"
+                                                    value={birthday}
+                                                    onChange={(e) => setBirthday(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Age Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="age">Age</Label>
+                                                <Input
+                                                    id="age"
+                                                    name="age"
+                                                    type="number"
+                                                    value={age}
+                                                    onChange={(e) => setAge(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Gender Field with Select */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="gender">Gender</Label>
+                                                <select
+                                                    id="gender"
+                                                    name="gender"
+                                                    className="w-full p-2 border rounded-md"
+                                                    value={gender}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                >
+                                                    <option value="">Select Gender</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                            </div>
+
+                                            {/* NIC Number Field */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="nicNumber">NIC Number</Label>
+                                                <Input
+                                                    id="nicNumber"
+                                                    name="nicNumber"
+                                                    value={nicNumber}
+                                                    onChange={(e) => setNicNumber(e.target.value)}
+                                                />
+                                            </div>
+
+                                            {/* Education Level Field with Select */}
+                                            <div className="space-y-2">
+                                                <Label htmlFor="educationLevel">Education Level</Label>
+                                                <select
+                                                    id="educationLevel"
+                                                    name="educationLevel"
+                                                    className="w-full p-2 border rounded-md"
+                                                    value={educationLevel}
+                                                    onChange={(e) => setEducationLevel(e.target.value)}
+                                                >
+                                                    <option value="">Select Education Level</option>
+                                                    <option value="Diploma Level">Diploma Level</option>
+                                                    <option value="Higher Diploma">Higher Diploma</option>
+                                                    <option value="BSc Level">BSc Level</option>
+                                                    <option value="Masters">Masters</option>
+                                                    <option value="PhD Level">PhD Level</option>
+                                                </select>
                                             </div>
 
                                             {/* Image Upload Field */}

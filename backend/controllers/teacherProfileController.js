@@ -29,7 +29,19 @@ exports.addProfile = async (req, res) =>
             }
 
             // Get form data
-            const { name, lecturerEmail, spcialization, bio, department } = req.body;
+            const { name,
+                lecturerEmail,
+                spcialization,
+                bio,
+                department,
+                campus,
+                liveLocation,
+                mobileNumber,
+                birthday,
+                gender,
+                nicNumber,
+                age,
+                educationLevel } = req.body;
 
             // Create profile data object
             const profileData = {
@@ -37,7 +49,15 @@ exports.addProfile = async (req, res) =>
                 lecturerEmail,
                 spcialization,
                 bio,
-                department
+                department,
+                campus,
+                liveLocation,
+                mobileNumber,
+                birthday,
+                gender,
+                nicNumber,
+                age,
+                educationLevel
             };
 
             // Add profile image path if file was uploaded

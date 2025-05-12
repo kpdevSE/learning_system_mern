@@ -195,8 +195,8 @@ export default function LecturerSidebar()
                             <Avatar className="h-16 w-16">
                                 {user && user.profileImage ? (
                                     <AvatarImage
-                                        src={`http://localhost:5000${user.profileImage}`}
-                                        alt={user.name || "Profile"}
+                                        src={`http://localhost:5000${user?.profileImage}`}
+                                        alt={user?.name || "Profile"}
                                     />
                                 ) : (
                                     <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
@@ -204,8 +204,8 @@ export default function LecturerSidebar()
 
                             </Avatar>
                             <div className="ml-3">
-                                <p className="text-sm font-medium">{user.name || "User Name"}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user.lecturerEmail || "user@example.com"}</p>
+                                <p className="text-sm font-medium">{user?.name || "User Name"}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.lecturerEmail || "user@example.com"}</p>
                             </div>
                         </div>
                         <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer' onClick={handleLogout}>
