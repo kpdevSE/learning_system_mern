@@ -114,8 +114,6 @@ export default function StudentProfilePage()
 
                 setUser(response.data.data);
                 console.log(response.data.data)
-
-                console.log(response.data.data)
             } catch (err)
             {
                 console.error('Error fetching user:', err);
@@ -138,9 +136,8 @@ export default function StudentProfilePage()
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    withCredentials: true
-                });
 
+                });
 
                 setLoggedUser(response.data.data);
                 console.log(response.data.data)
@@ -176,8 +173,17 @@ export default function StudentProfilePage()
                                     {/* <AvatarFallback>{user.name.charAt(0) || "U"}</AvatarFallback> */}
                                 </Avatar>
                                 <div>
-                                    <CardTitle>{loggedUser?.name}</CardTitle>
-                                    <CardDescription>{loggedUser?.email}</CardDescription>
+                                    {
+                                        loggedUser && loggedUser.name && loggedUser.email ? (
+                                            <div>
+                                                <CardTitle>{loggedUser.name}</CardTitle>
+                                                <CardDescription>{loggedUser.email}</CardDescription>
+                                            </div>
+                                        ) : (
+                                            <div>Null</div>
+                                        )
+                                    }
+
                                 </div>
                             </div>
                             <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
@@ -340,7 +346,7 @@ export default function StudentProfilePage()
 
                                     <div>
                                         <h3 className="font-medium text-sm text-gray-500">Bio</h3>
-                                        <p className="text-gray-700">{user.bio}</p>
+                                        <p className="text-gray-700">{formData.bio}</p>
                                     </div>
                                 </div>
                             )}

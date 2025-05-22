@@ -11,7 +11,8 @@ export default function StudentSidebar()
 {
     const [isMobileView, setIsMobileView] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const [user, setUser] = useState()
+    const [user, setUser] = useState({})
+    const [newUser, setNewUser] = useState({})
     const navigate = useNavigate();
 
     // Menu items for the student sidebar
@@ -57,7 +58,6 @@ export default function StudentSidebar()
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    withCredentials: true,
                 });
 
 
@@ -88,9 +88,7 @@ export default function StudentSidebar()
 
                 });
 
-                setUser(response.data.data);
-                console.log(response.data.data)
-
+                setNewUser(response.data.data);
                 console.log(response.data.data)
             } catch (err)
             {
@@ -192,10 +190,10 @@ export default function StudentSidebar()
 
                         <div className="flex items-center pt-2">
                             <Avatar className="h-16 w-16">
-                                {user && user.profileImage ? (
+                                {newUser && newUser.profileImage ? (
                                     <AvatarImage
-                                        src={`http://localhost:5000${user.profileImage}`}
-                                        alt={user.name || "Profile"}
+                                        src={`http://localhost:5000${newUser?.profileImage} `}
+                                        alt={newUser?.name || "Profile"}
                                     />
                                 ) : (
                                     <AvatarImage src="/api/placeholder/100/100" alt="Profile" />
@@ -204,7 +202,8 @@ export default function StudentSidebar()
                             </Avatar>
                             <div className="ml-3">
                                 <p className="text-sm font-medium">{user?.name || "Student Name"}</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.lecturerEmail || "example@gmail.com"}</p>
+                                {console.log(user)}
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email || "example@gmail.com"}</p>
 
                             </div>
                         </div>

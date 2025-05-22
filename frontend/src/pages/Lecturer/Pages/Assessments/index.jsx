@@ -15,7 +15,9 @@ import
     Search, Filter, FileText, Clock, Users, BarChart, Plus,
     Calendar, Edit, Eye, Trash, Wand2,
     Upload,
-    AlertCircle
+    AlertCircle,
+    Download,
+    ExternalLink
 } from "lucide-react";
 
 import
@@ -28,6 +30,19 @@ import
     DialogFooter,
     DialogTrigger
 } from "@/components/ui/dialog";
+
+import
+{
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,13 +59,16 @@ import
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-
+import { Separator } from "@/components/ui/separator";
 
 export default function AssessmentsPage()
 {
     const [assessments, setAssessments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [user, setUser] = useState({})
+    const [user, setUser] = useState({});
+    const [viewDialogOpen, setViewDialogOpen] = useState(false);
+    const [selectedAssessment, setSelectedAssessment] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() =>
     {
@@ -67,7 +85,6 @@ export default function AssessmentsPage()
                     },
                     withCredentials: true,
                 });
-
 
                 setUser(response.data.data);
                 console.log(response.data.data)
@@ -107,8 +124,64 @@ export default function AssessmentsPage()
         fetchAssessments();
     }, []);
 
+    // Handle view assessment
+    const handleViewAssessment = (assessment) =>
+    {
+        setSelectedAssessment(assessment);
+        setViewDialogOpen(true);
+    };
 
+    // Handle delete assessment
+    const handleDeleteAssessment = async (assessmentId) =>
+    {
+        setIsDeleting(true);
+        try
+        {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:5000/api/users/deleteassessment/${assessmentId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
 
+            // Remove assessment from state
+            setAssessments(prev => prev.filter(assessment => assessment._id !== assessmentId));
+            toast.success("Assessment deleted successfully!");
+        } catch (error)
+        {
+            console.error('Failed to delete assessment:', error);
+            toast.error(error.response?.data?.message || "Failed to delete assessment");
+        } finally
+        {
+            setIsDeleting(false);
+        }
+    };
+
+    // Format date helper
+    const formatDate = (dateString) =>
+    {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    // Handle PDF download
+    const handleDownloadPDF = (assessment) =>
+    {
+        if (assessment.pdfFile && assessment.pdfFile.fileUrl)
+        {
+            const downloadUrl = `http://localhost:5000${assessment.pdfFile.fileUrl}`;
+            window.open(downloadUrl, '_blank');
+        } else
+        {
+            toast.error("No PDF file available for this assessment");
+        }
+    };
 
     const renderAssessmentCards = (filterType) =>
     {
@@ -123,7 +196,7 @@ export default function AssessmentsPage()
         return (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {filtered.map((assessment) => (
-                    <Card key={assessment._id} className="overflow-hidden">
+                    <Card key={assessment._id} className="overflow-hidden hover:shadow-md transition-shadow">
                         <CardHeader className="pb-3">
                             <div className="flex justify-between items-start">
                                 <CardTitle className="text-xl">
@@ -143,7 +216,7 @@ export default function AssessmentsPage()
                             </div>
                             <CardDescription className="flex items-center mt-1">
                                 <Calendar className="h-3.5 w-3.5 mr-1" />
-                                Due: {assessment.dueDate}
+                                Due: {formatDate(assessment.dueDate)}
                             </CardDescription>
                         </CardHeader>
 
@@ -155,7 +228,7 @@ export default function AssessmentsPage()
                                         <span>Submissions</span>
                                     </div>
                                     <p className="text-xl font-semibold">
-                                        {assessment.submissionCount}/{assessment.totalStudents}
+                                        {assessment.submissionCount || 0}/{assessment.totalStudents || 0}
                                     </p>
                                 </div>
 
@@ -166,7 +239,7 @@ export default function AssessmentsPage()
                                     </div>
                                     <p className="text-xl font-semibold">
                                         {assessment.status === "published" && assessment.submissionCount > 0
-                                            ? `${assessment.averageScore}%`
+                                            ? `${assessment.averageScore || 0}%`
                                             : "N/A"}
                                     </p>
                                 </div>
@@ -181,29 +254,74 @@ export default function AssessmentsPage()
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Show PDF info if available */}
+                            {assessment.pdfFile && (
+                                <div className="mt-3 p-2 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center text-sm text-gray-600">
+                                            <FileText className="h-4 w-4 mr-1" />
+                                            <span>{assessment.pdfFile.fileName}</span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDownloadPDF(assessment)}
+                                            className="text-blue-600 hover:text-blue-800"
+                                        >
+                                            <Download className="h-3 w-3 mr-1" />
+                                            Download
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
 
                         <CardFooter className="flex justify-between pt-3 border-t">
-                            <Button variant="outline" size="sm" className="flex items-center gap-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-1"
+                                onClick={() => handleViewAssessment(assessment)}
+                            >
                                 <Eye size={14} />
                                 View
                             </Button>
 
                             <div className="flex gap-2">
-                                <Button variant="ghost" size="sm" className="flex items-center gap-1">
-                                    <Edit size={14} />
-                                    Edit
-                                </Button>
 
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-red-500 flex items-center gap-1"
-                                    onClick={() => handleDeleteAssessment(assessment._id)}
-                                >
-                                    <Trash size={14} />
-                                    Delete
-                                </Button>
+
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="text-red-500 border-red-200 hover:bg-red-50 flex items-center gap-1"
+                                            disabled={isDeleting}
+                                        >
+                                            <Trash size={14} />
+                                            Delete
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the assessment
+                                                "{assessment.title}" and all associated data.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={() => handleDeleteAssessment(assessment._id)}
+                                                className="bg-red-500 hover:bg-red-600"
+                                            >
+                                                Delete
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </div>
                         </CardFooter>
                     </Card>
@@ -212,7 +330,7 @@ export default function AssessmentsPage()
         );
     };
 
-    const [open, setOpen] = useState(true);
+    const [open, setOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("manual");
     const [assessmentType, setAssessmentType] = useState("");
     const [difficulty, setDifficulty] = useState("");
@@ -222,7 +340,7 @@ export default function AssessmentsPage()
     const [dueDate, setDueDate] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [autoGrading, setAutoGrading] = useState(false);
-    const [createdBy, setCreatedBy] = useState(loggedUser)
+    const [createdBy, setCreatedBy] = useState(loggedUser);
 
     const handleFileChange = (e) =>
     {
@@ -248,7 +366,6 @@ export default function AssessmentsPage()
             formData.append("totalMarks", totalMarks.toString());
             formData.append("autoGrading", autoGrading.toString());
 
-            // <-- IMPORTANT: match the field name your Multer middleware expects
             if (selectedFile)
             {
                 formData.append("pdfFile", selectedFile);
@@ -266,14 +383,12 @@ export default function AssessmentsPage()
                 }
             );
 
-            // Axios doesn’t have `res.ok`—check status instead
             if (res.status !== 201)
             {
                 throw new Error("Failed to create assessment");
             }
 
             const newAssessment = res.data.assessment;
-            // prepend to your list
             setAssessments((prev) => [newAssessment, ...prev]);
 
             // reset form
@@ -285,6 +400,7 @@ export default function AssessmentsPage()
             setTotalMarks(100);
             setAutoGrading(false);
             setSelectedFile(null);
+            setOpen(false);
 
             toast.success("Assessment created successfully!");
         } catch (err)
@@ -306,9 +422,7 @@ export default function AssessmentsPage()
                     </div>
 
                     <div className="flex gap-4">
-
-
-                        <Dialog >
+                        <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center gap-2">
                                     <Plus size={16} />
@@ -326,7 +440,6 @@ export default function AssessmentsPage()
                                 <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-4">
                                     <TabsList className="grid grid-cols-2 w-full">
                                         <TabsTrigger value="manual">Manual Creation</TabsTrigger>
-
                                     </TabsList>
 
                                     <TabsContent value="manual" className="space-y-4 mt-4">
@@ -347,7 +460,7 @@ export default function AssessmentsPage()
                                                     <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                                                     <Input
                                                         id="due-date"
-                                                        type="date"
+                                                        type="datetime-local"
                                                         className="pl-10"
                                                         value={dueDate}
                                                         onChange={(e) => setDueDate(e.target.value)}
@@ -476,8 +589,6 @@ export default function AssessmentsPage()
                                             </Label>
                                         </div>
                                     </TabsContent>
-
-
                                 </Tabs>
 
                                 <DialogFooter className="flex justify-between mt-6 pt-4 border-t">
@@ -491,8 +602,6 @@ export default function AssessmentsPage()
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-
-
                     </div>
                 </div>
 
@@ -536,9 +645,131 @@ export default function AssessmentsPage()
                         {renderAssessmentCards("project")}
                     </TabsContent>
                 </Tabs>
+
+                {/* View Assessment Dialog */}
+                <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold">
+                                {selectedAssessment?.title}
+                            </DialogTitle>
+                            <div className="flex items-center gap-2 mt-2">
+                                <Badge
+                                    variant={selectedAssessment?.status === "published" ? "default" : "outline"}
+                                    className={selectedAssessment?.status === "published" ? "bg-green-500" : "text-amber-500 border-amber-500"}
+                                >
+                                    {selectedAssessment?.status === "published" ? "Published" : "Draft"}
+                                </Badge>
+                                <Badge variant="outline" className="capitalize">
+                                    {selectedAssessment?.type}
+                                </Badge>
+                                <Badge variant="outline" className="capitalize">
+                                    {selectedAssessment?.difficulty}
+                                </Badge>
+                                {selectedAssessment?.aiGenerated && (
+                                    <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                                        AI Generated
+                                    </Badge>
+                                )}
+                            </div>
+                        </DialogHeader>
+
+                        {selectedAssessment && (
+                            <div className="space-y-6 mt-4">
+                                <div>
+                                    <h3 className="font-semibold text-lg mb-2">Description</h3>
+                                    <p className="text-gray-600 leading-relaxed">
+                                        {selectedAssessment.description || "No description provided."}
+                                    </p>
+                                </div>
+
+                                <Separator />
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3">Assessment Details</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Total Marks:</span>
+                                                <span className="font-medium">{selectedAssessment.totalMarks}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Due Date:</span>
+                                                <span className="font-medium">{formatDate(selectedAssessment.dueDate)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Auto Grading:</span>
+                                                <span className="font-medium">
+                                                    {selectedAssessment.autoGrading ? "Enabled" : "Disabled"}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Created:</span>
+                                                <span className="font-medium">
+                                                    {formatDate(selectedAssessment.createdAt)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3">Statistics</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Total Students:</span>
+                                                <span className="font-medium">{selectedAssessment.totalStudents || 0}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Submissions:</span>
+                                                <span className="font-medium">{selectedAssessment.submissionCount || 0}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Average Score:</span>
+                                                <span className="font-medium">
+                                                    {selectedAssessment.averageScore ? `${selectedAssessment.averageScore}%` : "N/A"}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-gray-600">Completion Rate:</span>
+                                                <span className="font-medium">
+                                                    {selectedAssessment.totalStudents ?
+                                                        `${Math.round((selectedAssessment.submissionCount || 0) / selectedAssessment.totalStudents * 100)}%`
+                                                        : "N/A"
+                                                    }
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {selectedAssessment.pdfFile && (
+                                    <>
+                                        <Separator />
+                                        <div>
+                                            <h3 className="font-semibold text-lg mb-3">Attached Files</h3>
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex items-center">
+                                                    <FileText className="h-5 w-5 text-blue-500 mr-2" />
+                                                    <span className="font-medium">{selectedAssessment.pdfFile.fileName}</span>
+                                                </div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleDownloadPDF(selectedAssessment)}
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    Download
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
 }
-
-

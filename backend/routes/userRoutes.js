@@ -10,7 +10,7 @@ const { getNotificationsByRole, sendNotification, getStudentNotificationCount, g
 const { getAllPDFs, deletePDF, getAllPDFsByEmail, uploadPDF } = require('../controllers/pdfController');
 const { createReview, getLecturerReviews, getAllReviews, getLecturerReviewsDetails } = require('../controllers/reviewsController');
 const { createBooking, getMyBookings, deleteBooking, getLecturerBookings, getLecturerBookingsByEmail, updateBookingStatus } = require('../controllers/bookingController');
-const { createAssessment } = require('../controllers/assessmentController');
+const { createAssessment, getAllAssessments, deleteAssessment, } = require('../controllers/assessmentController');
 
 const uploadPdfconfig = require('../config/uploadPFD');
 
@@ -71,6 +71,7 @@ router.get('/getLecturerbookings', getLecturerBookingsByEmail)
 
 // Assessments
 router.post("/uploadassessments", uploadPdfconfig.single('pdfFile'), createAssessment);
-
+router.get('/getassessments', getAllAssessments)
+router.delete('/deleteassessment/:id', deleteAssessment)
 
 module.exports = router;

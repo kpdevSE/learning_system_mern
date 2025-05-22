@@ -1,90 +1,68 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import StudentSidebar from "../../Components/StudentSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3 } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3, Bot } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function Assessments()
 {
     const [filter, setFilter] = useState("all");
+    const [isLoading, setIsLoading] = useState(true);
+    const [assessments, setAssessments] = useState([]);
 
-    // Sample assessment data
-    const assessments = [
+    useEffect(() =>
+    {
+        const fetchAssessments = async () =>
         {
-            id: 1,
-            title: "Midterm Examination",
-            subject: "Mathematics",
-            dueDate: "May 5, 2025",
-            status: "upcoming",
-            type: "exam",
-            totalMarks: 100,
-            weightage: "30%"
-        },
-        {
-            id: 2,
-            title: "Web Development Project",
-            subject: "Computer Science",
-            dueDate: "May 10, 2025",
-            status: "upcoming",
-            type: "project",
-            totalMarks: 50,
-            weightage: "20%"
-        },
-        {
-            id: 3,
-            title: "Physics Quiz",
-            subject: "Physics",
-            dueDate: "Apr 28, 2025",
-            status: "pending",
-            type: "quiz",
-            totalMarks: 20,
-            weightage: "10%"
-        },
-        {
-            id: 4,
-            title: "Literature Essay",
-            subject: "English",
-            dueDate: "Apr 15, 2025",
-            status: "completed",
-            type: "assignment",
-            totalMarks: 30,
-            marks: 27,
-            weightage: "15%"
-        },
-        {
-            id: 5,
-            title: "Chemistry Lab Report",
-            subject: "Chemistry",
-            dueDate: "Apr 10, 2025",
-            status: "completed",
-            type: "lab",
-            totalMarks: 40,
-            marks: 35,
-            weightage: "15%"
-        }
-    ];
+            try
+            {
+                const token = localStorage.getItem('token');
+                const response = await axios.get('http://localhost:5000/api/users/getassessments', {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    }
+                });
+                setAssessments(response.data.assessments);
+                setIsLoading(false);
+            } catch (error)
+            {
+                console.error('Failed to fetch assessments', error);
+                setIsLoading(false);
+            }
+        };
+
+        fetchAssessments();
+    }, []);
 
     // Filter assessments based on selected filter
-    const filteredAssessments = filter === "all"
-        ? assessments
-        : assessments.filter(assessment => assessment.status === filter);
+    const filteredAssessments = assessments.filter(assessment =>
+    {
+        if (filter === "all") return true;
+        return assessment.status === filter;
+    });
 
-    // Get statistics
-    const stats = {
-        upcoming: assessments.filter(a => a.status === "upcoming").length,
-        pending: assessments.filter(a => a.status === "pending").length,
-        completed: assessments.filter(a => a.status === "completed").length,
-        total: assessments.length
+    // Calculate stats
+    const totalAssessments = assessments.length;
+    const upcomingCount = assessments.filter(a => a.status === "upcoming").length;
+    const pendingCount = assessments.filter(a => a.status === "pending").length;
+    const completedCount = assessments.filter(a => a.status === "completed").length;
+    const draftCount = assessments.filter(a => a.status === "draft").length;
+
+    // Format date helper
+    const formatDate = (dateString) =>
+    {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
     };
-
-    const completedAssessments = assessments.filter(a => a.status === "completed");
-    const totalScore = completedAssessments.reduce((sum, a) => sum + a.marks, 0);
-    const totalPossible = completedAssessments.reduce((sum, a) => sum + a.totalMarks, 0);
-    const averageScore = totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0;
 
     // Status badge renderer
     const renderStatusBadge = (status) =>
@@ -109,9 +87,32 @@ export default function Assessments()
                         <Calendar className="w-3 h-3 mr-1" /> Upcoming
                     </Badge>
                 );
+            case "draft":
+                return (
+                    <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+                        <FileText className="w-3 h-3 mr-1" /> Draft
+                    </Badge>
+                );
             default:
                 return null;
         }
+    };
+
+    // Type badge renderer
+    const renderTypeBadge = (type) =>
+    {
+        const typeColors = {
+            exam: "bg-red-50 text-red-700 border-red-200",
+            quiz: "bg-blue-50 text-blue-700 border-blue-200",
+            assignment: "bg-green-50 text-green-700 border-green-200",
+            project: "bg-purple-50 text-purple-700 border-purple-200"
+        };
+
+        return (
+            <Badge variant="outline" className={typeColors[type] || "bg-gray-50 text-gray-700"}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+            </Badge>
+        );
     };
 
     return (
@@ -136,7 +137,8 @@ export default function Assessments()
                             <CardTitle className="text-sm font-medium">Total Assessments</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.total}</div>
+                            <div className="text-2xl font-bold">{totalAssessments}</div>
+                            <p className="text-xs text-muted-foreground">All assessments</p>
                         </CardContent>
                     </Card>
 
@@ -145,7 +147,8 @@ export default function Assessments()
                             <CardTitle className="text-sm font-medium">Upcoming</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.upcoming}</div>
+                            <div className="text-2xl font-bold text-blue-600">{upcomingCount}</div>
+                            <p className="text-xs text-muted-foreground">Due soon</p>
                         </CardContent>
                     </Card>
 
@@ -154,7 +157,8 @@ export default function Assessments()
                             <CardTitle className="text-sm font-medium">Pending</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.pending}</div>
+                            <div className="text-2xl font-bold text-amber-600">{pendingCount}</div>
+                            <p className="text-xs text-muted-foreground">Awaiting submission</p>
                         </CardContent>
                     </Card>
 
@@ -163,7 +167,8 @@ export default function Assessments()
                             <CardTitle className="text-sm font-medium">Completed</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stats.completed}</div>
+                            <div className="text-2xl font-bold text-green-600">{completedCount}</div>
+                            <p className="text-xs text-muted-foreground">Finished</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -175,200 +180,143 @@ export default function Assessments()
                             <CardHeader>
                                 <CardTitle>Assessment List</CardTitle>
                                 <CardDescription>View and manage your assignments, quizzes, and exams</CardDescription>
-                                <div className="flex space-x-2 mt-2">
+                                <div className="flex space-x-2 mt-4">
                                     <Button
                                         variant={filter === "all" ? "default" : "outline"}
                                         size="sm"
                                         onClick={() => setFilter("all")}
                                     >
-                                        All
+                                        All ({totalAssessments})
                                     </Button>
                                     <Button
                                         variant={filter === "upcoming" ? "default" : "outline"}
                                         size="sm"
                                         onClick={() => setFilter("upcoming")}
                                     >
-                                        Upcoming
+                                        Upcoming ({upcomingCount})
                                     </Button>
                                     <Button
                                         variant={filter === "pending" ? "default" : "outline"}
                                         size="sm"
                                         onClick={() => setFilter("pending")}
                                     >
-                                        Pending
+                                        Pending ({pendingCount})
                                     </Button>
                                     <Button
                                         variant={filter === "completed" ? "default" : "outline"}
                                         size="sm"
                                         onClick={() => setFilter("completed")}
                                     >
-                                        Completed
+                                        Completed ({completedCount})
                                     </Button>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Assessment</TableHead>
-                                            <TableHead>Subject</TableHead>
-                                            <TableHead>Due Date</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Action</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {filteredAssessments.map((assessment) => (
-                                            <TableRow key={assessment.id}>
-                                                <TableCell className="font-medium">{assessment.title}</TableCell>
-                                                <TableCell>{assessment.subject}</TableCell>
-                                                <TableCell>{assessment.dueDate}</TableCell>
-                                                <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <Button variant="ghost" size="sm">
-                                                        View
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                        {filteredAssessments.length === 0 && (
-                                            <TableRow>
-                                                <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                                                    No assessments found
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Upcoming Deadlines</CardTitle>
-                                <CardDescription>Assessments due in the next 7 days</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {assessments
-                                        .filter(a => a.status === "upcoming" || a.status === "pending")
-                                        .slice(0, 3)
-                                        .map((assessment) => (
-                                            <div key={assessment.id} className="flex items-start gap-4 p-3 rounded-lg border">
-                                                <div className="bg-primary/10 p-2 rounded-md">
-                                                    {assessment.type === "exam" && <FileText className="h-5 w-5 text-primary" />}
-                                                    {assessment.type === "quiz" && <AlertCircle className="h-5 w-5 text-primary" />}
-                                                    {assessment.type === "project" && <BarChart3 className="h-5 w-5 text-primary" />}
-                                                    {assessment.type === "assignment" && <FileText className="h-5 w-5 text-primary" />}
-                                                    {assessment.type === "lab" && <FileText className="h-5 w-5 text-primary" />}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className="font-medium">{assessment.title}</h4>
-                                                            <p className="text-sm text-muted-foreground">{assessment.subject}</p>
-                                                        </div>
-                                                        <Badge variant="outline">{assessment.type}</Badge>
-                                                    </div>
-                                                    <div className="flex items-center justify-between mt-2">
-                                                        <div className="text-sm">
-                                                            Due: <span className="font-medium">{assessment.dueDate}</span>
-                                                        </div>
-                                                        <div className="text-sm">
-                                                            Weightage: <span className="font-medium">{assessment.weightage}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                    {assessments.filter(a => a.status === "upcoming" || a.status === "pending").length === 0 && (
-                                        <div className="text-center py-6 text-muted-foreground">
-                                            No upcoming deadlines
+                                {isLoading ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <div className="text-center">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-2"></div>
+                                            <p className="text-muted-foreground">Loading assessments...</p>
                                         </div>
-                                    )}
-                                </div>
+                                    </div>
+                                ) : (
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Assessment</TableHead>
+                                                <TableHead>Type</TableHead>
+                                                <TableHead>Due Date</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Progress</TableHead>
+                                                <TableHead className="text-right">Action</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredAssessments.map((assessment) => (
+                                                <TableRow key={assessment._id}>
+                                                    <TableCell>
+                                                        <div className="flex items-center space-x-2">
+                                                            <div>
+                                                                <div className="font-medium flex items-center">
+                                                                    {assessment.title}
+                                                                    {assessment.aiGenerated && (
+                                                                        <Bot className="w-4 h-4 ml-2 text-blue-500" title="AI Generated" />
+                                                                    )}
+                                                                </div>
+                                                                {assessment.content && (
+                                                                    <div className="text-sm text-muted-foreground truncate max-w-xs">
+                                                                        {assessment.content.substring(0, 50)}...
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>{renderTypeBadge(assessment.type)}</TableCell>
+                                                    <TableCell>{formatDate(assessment.dueDate)}</TableCell>
+                                                    <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Progress
+                                                                value={assessment.submissionCount && assessment.totalStudents ?
+                                                                    (assessment.submissionCount / assessment.totalStudents) * 100 : 0}
+                                                                className="w-16"
+                                                            />
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {assessment.submissionCount || 0}/{assessment.totalStudents || 0}
+                                                            </span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <Button variant="ghost" size="sm">
+                                                            View
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                            {filteredAssessments.length === 0 && !isLoading && (
+                                                <TableRow>
+                                                    <TableCell colSpan={6} className="text-center py-8">
+                                                        <div className="flex flex-col items-center space-y-2">
+                                                            <FileText className="w-12 h-12 text-muted-foreground/50" />
+                                                            <p className="text-muted-foreground">
+                                                                {filter === "all" ? "No assessments found" : `No ${filter} assessments`}
+                                                            </p>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                )}
                             </CardContent>
-                            <CardFooter>
-                                <Button variant="outline" className="w-full">View All Deadlines</Button>
-                            </CardFooter>
                         </Card>
                     </div>
 
                     {/* Right column */}
                     <div className="space-y-6">
+                        {/* Quick Stats */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>Performance Overview</CardTitle>
-                                <CardDescription>Your assessment scores and statistics</CardDescription>
+                                <CardTitle>Quick Overview</CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="font-medium">Average Score</h4>
-                                        <span className="text-lg font-bold">{averageScore}%</span>
-                                    </div>
-                                    <Progress value={averageScore} className="h-2" />
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm">Draft Assessments</span>
+                                    <Badge variant="outline">{draftCount}</Badge>
                                 </div>
-
-                                {completedAssessments.length > 0 ? (
-                                    <div className="space-y-4">
-                                        <h4 className="font-medium text-sm">Recent Results</h4>
-                                        {completedAssessments.slice(0, 3).map(assessment => (
-                                            <div key={assessment.id} className="flex justify-between items-center border-b pb-2">
-                                                <div>
-                                                    <p className="font-medium">{assessment.title}</p>
-                                                    <p className="text-sm text-muted-foreground">{assessment.subject}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="font-bold">{assessment.marks}/{assessment.totalMarks}</p>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        {Math.round((assessment.marks / assessment.totalMarks) * 100)}%
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-4 text-muted-foreground">
-                                        No completed assessments yet
-                                    </div>
-                                )}
-                            </CardContent>
-                            <CardFooter>
-                                <Button variant="outline" className="w-full">View Detailed Performance</Button>
-                            </CardFooter>
-                        </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Subject Distribution</CardTitle>
-                                <CardDescription>Assessment breakdown by subject</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-4">
-                                    {[...new Set(assessments.map(a => a.subject))].map(subject =>
-                                    {
-                                        const subjectAssessments = assessments.filter(a => a.subject === subject);
-                                        const completed = subjectAssessments.filter(a => a.status === "completed").length;
-                                        const total = subjectAssessments.length;
-                                        const percentage = Math.round((completed / total) * 100) || 0;
-
-                                        return (
-                                            <div key={subject}>
-                                                <div className="flex justify-between mb-1">
-                                                    <span className="text-sm font-medium">{subject}</span>
-                                                    <span className="text-sm text-muted-foreground">{completed}/{total}</span>
-                                                </div>
-                                                <div className="h-2 rounded-full bg-slate-200">
-                                                    <div
-                                                        className="h-2 rounded-full bg-primary"
-                                                        style={{ width: `${percentage}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm">AI Generated</span>
+                                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                                        {assessments.filter(a => a.aiGenerated).length}
+                                    </Badge>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm">Average Score</span>
+                                    <Badge variant="outline">
+                                        {assessments.length > 0 ?
+                                            Math.round(assessments.reduce((acc, a) => acc + (a.averageScore || 0), 0) / assessments.length)
+                                            : 0}%
+                                    </Badge>
                                 </div>
                             </CardContent>
                         </Card>
