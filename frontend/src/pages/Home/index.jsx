@@ -10,6 +10,7 @@ import Girl from '../../assets/girl.jpg'
 import Boy from '../../assets/boy.jpg'
 import FooterComponent from '@/components/ui/Components/Footer';
 
+
 export default function LMSLandingPage()
 {
 
@@ -85,6 +86,7 @@ export default function LMSLandingPage()
         <div className="min-h-screen bg-white">
             {/* Navigation */}
             <Navbar />
+
 
             {/* Hero Section */}
             <div className="bg-gradient-to-r from-violet-50 to-indigo-50 border-b border-gray-200">

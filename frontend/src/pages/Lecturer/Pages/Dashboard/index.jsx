@@ -3,7 +3,7 @@ import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, Users, DollarSign, Star, Clock, LoaderIcon, IndianRupee, Bell } from "lucide-react";
+import { Calendar, Users, DollarSign, Star, Clock, LoaderIcon, IndianRupee, Bell, Settings, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -264,6 +264,20 @@ export default function LecturerDashboard()
 
         fetchMessages();
     }, []);
+    const [isOpen, setIsOpen] = useState(false);
+    const unreadCount = message ? message.filter(n => !n.read).length : 0;
+
+    const formatDate = (dateString) =>
+    {
+        if (!dateString) return 'Recently';
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+        if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+        if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+        return `${Math.floor(diffInMinutes / 1440)}d ago`;
+    };
 
     useEffect(() =>
     {
@@ -284,38 +298,104 @@ export default function LecturerDashboard()
                 <div className="max-w-7xl mx-auto">
                     <h1 className="text-2xl font-bold mb-6">Lecturer Dashboard</h1>
 
-                    <AlertDialog>
+                    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                         <AlertDialogTrigger asChild>
-                            <div className="flex items-center">
-                                <Button variant="ghost" size="icon">
-                                    <Bell className="h-20 w-20" />
-                                </Button>
-                                <div className="text-red-600 font-semibold w-[20px] h-[20px] rounded relative bg-white flex items-center justify-center">
-                                    {notificationCount}
+                            <button
+                                onClick={() => setIsOpen(true)}
+                                className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                            >
+                                <Bell className="h-6 w-6 text-gray-600" />
+                                {unreadCount > 0 && (
+                                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </div>
+                                )}
+                            </button>
+                        </AlertDialogTrigger>
+
+                        <AlertDialogContent className="max-w-md w-full mx-4 p-0 overflow-hidden">
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4 text-white">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-lg font-semibold">Notifications</h2>
+                                        <p className="text-blue-100 text-sm">
+                                            {message ? message.length : 0} total, {unreadCount} unread
+                                        </p>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                        <button className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors">
+                                            <Settings className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => setIsOpen(false)}
+                                            className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+                                            title="Close"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Notification</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    View your Notifications
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
 
-                            <div className="space-y-4">
-                                {filteredMessages.map((e, index) => (
-                                    <Card key={index} className="p-4 shadow-md rounded-lg border border-black">
-                                        <p className="text-gray-800 text-lg">{e.message}</p>
-                                        <p className="text-[13px] text-gray-400 font-semibold">By Admin User</p>
-                                    </Card>
-                                ))}
+                            {/* Notifications List */}
+                            <div className="max-h-96 overflow-y-auto">
+                                {loading ? (
+                                    <div className="p-8 text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                                        <p className="text-sm text-gray-500">Loading notifications...</p>
+                                    </div>
+                                ) : !message || message.length === 0 ? (
+                                    <div className="p-8 text-center text-gray-500">
+                                        <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                                        <p className="text-sm">No notifications yet</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-gray-100">
+                                        {message.map((notification, index) => (
+                                            <div
+                                                key={notification._id || index}
+                                                className={`p-4 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50 border-l-4 border-blue-400' : ''
+                                                    }`}
+                                            >
+                                                <div className="flex items-start space-x-3">
+                                                    {/* Avatar or Icon */}
+                                                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
+                                                        {notification.sender ? notification.sender.charAt(0).toUpperCase() : 'A'}
+                                                    </div>
+
+                                                    {/* Content */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                {notification.sender || 'Admin User'}
+                                                            </p>
+                                                            {!notification.read && (
+                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                        <p className={`text-sm ${!notification.read ? 'text-gray-900' : 'text-gray-700'} mb-2`}>
+                                                            {notification.message}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {formatDate(notification.createdAt || notification.timestamp)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
-                            <AlertDialogFooter>
-                                <AlertDialogCancel className="bg-black text-white hover:bg-black hover:text-white cursor-pointer">Cancel</AlertDialogCancel>
-
-                            </AlertDialogFooter>
+                            {/* Footer */}
+                            {message && message.length > 0 && (
+                                <div className="border-t bg-gray-50 px-4 py-3">
+                                    <button className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                                        View All Notifications
+                                    </button>
+                                </div>
+                            )}
                         </AlertDialogContent>
                     </AlertDialog>
 
