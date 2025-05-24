@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3, Bot } from "lucide-react";
+import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3, Bot, Eye, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export default function Assessments()
 {
@@ -115,6 +116,16 @@ export default function Assessments()
         );
     };
 
+    const [selectedPdf, setSelectedPdf] = useState(null);
+    const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+
+    // Function to handle PDF viewing
+    const handleViewPdf = (assessment) =>
+    {
+        setSelectedPdf(assessment);
+        setIsPdfDialogOpen(true);
+    };
+
     return (
         <div className="flex h-screen bg-slate-50">
             <StudentSidebar />
@@ -220,73 +231,129 @@ export default function Assessments()
                                         </div>
                                     </div>
                                 ) : (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Assessment</TableHead>
-                                                <TableHead>Type</TableHead>
-                                                <TableHead>Due Date</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead>Progress</TableHead>
-                                                <TableHead className="text-right">Action</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredAssessments.map((assessment) => (
-                                                <TableRow key={assessment._id}>
-                                                    <TableCell>
-                                                        <div className="flex items-center space-x-2">
-                                                            <div>
-                                                                <div className="font-medium flex items-center">
-                                                                    {assessment.title}
-                                                                    {assessment.aiGenerated && (
-                                                                        <Bot className="w-4 h-4 ml-2 text-blue-500" title="AI Generated" />
+                                    <div>
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Assessment</TableHead>
+                                                    <TableHead>Type</TableHead>
+                                                    <TableHead>Due Date</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                    <TableHead>Progress</TableHead>
+                                                    <TableHead className="text-right">Action</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {filteredAssessments.map((assessment) => (
+                                                    <TableRow key={assessment._id}>
+                                                        <TableCell>
+                                                            <div className="flex items-center space-x-2">
+                                                                <div>
+                                                                    <div className="font-medium flex items-center">
+                                                                        {assessment.title}
+                                                                        {assessment.aiGenerated && (
+                                                                            <Bot className="w-4 h-4 ml-2 text-blue-500" title="AI Generated" />
+                                                                        )}
+                                                                    </div>
+                                                                    {assessment.content && (
+                                                                        <div className="text-sm text-muted-foreground truncate max-w-xs">
+                                                                            {assessment.content.substring(0, 50)}...
+                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                                {assessment.content && (
-                                                                    <div className="text-sm text-muted-foreground truncate max-w-xs">
-                                                                        {assessment.content.substring(0, 50)}...
-                                                                    </div>
-                                                                )}
                                                             </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>{renderTypeBadge(assessment.type)}</TableCell>
-                                                    <TableCell>{formatDate(assessment.dueDate)}</TableCell>
-                                                    <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center space-x-2">
-                                                            <Progress
-                                                                value={assessment.submissionCount && assessment.totalStudents ?
-                                                                    (assessment.submissionCount / assessment.totalStudents) * 100 : 0}
-                                                                className="w-16"
-                                                            />
-                                                            <span className="text-xs text-muted-foreground">
-                                                                {assessment.submissionCount || 0}/{assessment.totalStudents || 0}
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button variant="ghost" size="sm">
-                                                            View
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                            {filteredAssessments.length === 0 && !isLoading && (
-                                                <TableRow>
-                                                    <TableCell colSpan={6} className="text-center py-8">
-                                                        <div className="flex flex-col items-center space-y-2">
-                                                            <FileText className="w-12 h-12 text-muted-foreground/50" />
-                                                            <p className="text-muted-foreground">
-                                                                {filter === "all" ? "No assessments found" : `No ${filter} assessments`}
+                                                        </TableCell>
+                                                        <TableCell>{renderTypeBadge(assessment.type)}</TableCell>
+                                                        <TableCell>{formatDate(assessment.dueDate)}</TableCell>
+                                                        <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Progress
+                                                                    value={assessment.submissionCount && assessment.totalStudents ?
+                                                                        (assessment.submissionCount / assessment.totalStudents) * 100 : 0}
+                                                                    className="w-16"
+                                                                />
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {assessment.submissionCount || 0}/{assessment.totalStudents || 0}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <div className="flex items-center gap-2 justify-end">
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => handleViewPdf(assessment)}
+                                                                    disabled={!assessment.pdfFile?.fileUrl}
+                                                                >
+                                                                    <Eye className="w-4 h-4 mr-1" />
+                                                                    View
+                                                                </Button>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                                {filteredAssessments.length === 0 && !isLoading && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={6} className="text-center py-8">
+                                                            <div className="flex flex-col items-center space-y-2">
+                                                                <FileText className="w-12 h-12 text-muted-foreground/50" />
+                                                                <p className="text-muted-foreground">
+                                                                    {filter === "all" ? "No assessments found" : `No ${filter} assessments`}
+                                                                </p>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+
+                                        {/* PDF Viewer Dialog */}
+                                        <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
+                                            <DialogContent className="max-w-2xl">
+                                                <DialogHeader>
+                                                    <DialogTitle className="flex items-center gap-2">
+                                                        <FileText className="w-5 h-5" />
+                                                        {selectedPdf?.title || 'Assessment PDF'}
+                                                    </DialogTitle>
+                                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                        <span>File: {selectedPdf?.pdfFile?.fileName}</span>
+                                                        <span>Type: {selectedPdf?.type}</span>
+                                                        <span>Due: {selectedPdf?.dueDate ? formatDate(selectedPdf.dueDate) : 'N/A'}</span>
+                                                    </div>
+                                                </DialogHeader>
+
+                                                <div className="py-6">
+                                                    <div className="text-center space-y-4">
+                                                        <FileText className="w-16 h-16 text-muted-foreground mx-auto" />
+                                                        <div>
+                                                            <h3 className="font-medium mb-2">PDF Document</h3>
+                                                            <p className="text-sm text-muted-foreground mb-4">
+                                                                Click the buttons below to view or download the PDF
                                                             </p>
                                                         </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
+
+                                                        <div className="flex justify-center gap-3">
+
+
+                                                            <Button
+
+                                                                asChild
+                                                            >
+                                                                <a
+                                                                    href={selectedPdf?.pdfFile?.fileUrl}
+                                                                    download={selectedPdf?.pdfFile?.fileName}
+                                                                >
+                                                                    <Download className="w-4 h-4 mr-2" />
+                                                                    Download
+                                                                </a>
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </div>
                                 )}
                             </CardContent>
                         </Card>
