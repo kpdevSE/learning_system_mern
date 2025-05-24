@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3, Bot, Eye, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Link } from "react-router-dom";
 
 export default function Assessments()
 {
@@ -136,9 +137,7 @@ export default function Assessments()
                         <h1 className="text-3xl font-bold tracking-tight">Assessments</h1>
                         <p className="text-muted-foreground">Track and manage all your academic assessments</p>
                     </div>
-                    <Button>
-                        <FileText className="mr-2 h-4 w-4" /> Download Report
-                    </Button>
+
                 </div>
 
                 {/* Stats Overview */}
@@ -394,15 +393,11 @@ export default function Assessments()
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-2">
-                                    <Button variant="outline" className="w-full justify-start">
-                                        <FileText className="mr-2 h-4 w-4" /> Study Materials
-                                    </Button>
-                                    <Button variant="outline" className="w-full justify-start">
-                                        <Clock className="mr-2 h-4 w-4" /> Past Papers
-                                    </Button>
-                                    <Button variant="outline" className="w-full justify-start">
-                                        <BarChart3 className="mr-2 h-4 w-4" /> Performance Analytics
-                                    </Button>
+                                    <Link to='/student/course-materials'>
+                                        <Button variant="outline" className="w-full justify-start">
+                                            <FileText className="mr-2 h-4 w-4" /> Study Materials
+                                        </Button>
+                                    </Link>
                                 </div>
                             </CardContent>
                         </Card>
