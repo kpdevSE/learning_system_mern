@@ -208,10 +208,6 @@ export default function StudentSidebar()
                             </div>
                         </div>
                         <div className="mt-3 flex space-x-2">
-                            <Button variant="outline" size="sm" className="flex-1">
-                                <Settings size={16} className="mr-1" />
-                                Settings
-                            </Button>
                             <Button size="sm" className="flex-1 bg-red-600 hover:bg-red-500" onClick={handleLogout}>
                                 <LogOut size={16} className="mr-1" />
                                 Log Out

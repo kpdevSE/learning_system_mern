@@ -237,8 +237,8 @@ export default function Assessments()
                                                     <TableHead>Assessment</TableHead>
                                                     <TableHead>Type</TableHead>
                                                     <TableHead>Due Date</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead>Progress</TableHead>
+                                                    {/* <TableHead>Status</TableHead> */}
+                                                    {/* <TableHead>Progress</TableHead> */}
                                                     <TableHead className="text-right">Action</TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -264,8 +264,8 @@ export default function Assessments()
                                                         </TableCell>
                                                         <TableCell>{renderTypeBadge(assessment.type)}</TableCell>
                                                         <TableCell>{formatDate(assessment.dueDate)}</TableCell>
-                                                        <TableCell>{renderStatusBadge(assessment.status)}</TableCell>
-                                                        <TableCell>
+                                                        {/* <TableCell>{renderStatusBadge(assessment.status)}</TableCell> */}
+                                                        {/* <TableCell>
                                                             <div className="flex items-center space-x-2">
                                                                 <Progress
                                                                     value={assessment.submissionCount && assessment.totalStudents ?
@@ -276,7 +276,7 @@ export default function Assessments()
                                                                     {assessment.submissionCount || 0}/{assessment.totalStudents || 0}
                                                                 </span>
                                                             </div>
-                                                        </TableCell>
+                                                        </TableCell> */}
                                                         <TableCell className="text-right">
                                                             <div className="flex items-center gap-2 justify-end">
                                                                 <Button

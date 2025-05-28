@@ -41,29 +41,30 @@ export default function LMSLandingPage()
     const popularCourses = [
         {
             id: 1,
-            title: "Web Development Bootcamp",
-            category: "Programming",
+            title: "English Grammar Mastery",
+            category: "English",
             rating: 4.9,
-            students: "12,500+",
+            students: "15,300+",
             image: BootCampImage
         },
         {
             id: 2,
-            title: "UI/UX Design Masterclass",
-            category: "Design",
+            title: "Business English Communication",
+            category: "English",
             rating: 4.8,
-            students: "8,200+",
+            students: "9,100+",
             image: UIUXimage
         },
         {
             id: 3,
-            title: "Data Science Fundamentals",
-            category: "Data Science",
+            title: "IELTS Preparation Course",
+            category: "English",
             rating: 4.7,
-            students: "10,800+",
+            students: "11,700+",
             image: DataScience
         }
     ];
+
 
     const testimonials = [
         {
