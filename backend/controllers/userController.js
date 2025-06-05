@@ -78,4 +78,30 @@ exports.getStudentCount = async (req, res) =>
 };
 
 
+exports.getAllStudentsFunction = async (req, res) =>
+{
+    try
+    {
+        const students = await User.find({ role: 'student' })
+        res.status(200).json({ success: true, data: students });
+    } catch (error)
+    {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
+exports.getAllTeachersFunction = async (req, res) =>
+{
+    try
+    {
+        const students = await User.find({ role: 'teacher' })
+        res.status(200).json({ success: true, data: students });
+    } catch (error)
+    {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+
 

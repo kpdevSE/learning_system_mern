@@ -3,6 +3,7 @@ import { Menu, X, Home, Settings, Users, BarChart2, HelpCircle, Book, LogOut } f
 import { Button } from '../../../components/ui/button';
 import { Separator } from '../../../components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Link } from 'react-router-dom';
 
 export default function AdminSidebar()
 {
@@ -110,14 +111,16 @@ export default function AdminSidebar()
                         <div className="flex items-center pt-2">
                             <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
                             <div className="ml-3">
-                                <p className="text-sm font-medium">User Name</p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">user@example.com</p>
+                                <p className="text-sm font-medium">Admin</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">admin@example.com</p>
                             </div>
                         </div>
-                        <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer'>
-                            <LogOut />
-                            Log Out
-                        </Button>
+                        <Link to='/'>
+                            <Button className='bg-red-600 hover:bg-red-500 mt-3 cursor-pointer'>
+                                <LogOut />
+                                Log Out
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </div>

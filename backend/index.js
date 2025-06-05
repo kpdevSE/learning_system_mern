@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const statusRoutes = require('./routes/statusRoutes');
+const getRoutes = require('./routes/getRoutes');
 
 
 // DB Connection
@@ -40,6 +41,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/get', getRoutes);
 
 
 // Create admin user on startup

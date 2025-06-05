@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Users, BookOpen, Award, Calendar, Star, ArrowLeft, CheckCircle, Globe, Headphones, Video, MessageSquare, Target, Trophy, Zap, Play, Download, Mail, Phone } from 'lucide-react';
 import Navbar from '@/components/ui/Components/NavigationBar';
+import FooterComponent from '@/components/ui/Components/Footer';
 
 const ProgrammeAndFacilities = () =>
 {
@@ -19,7 +20,7 @@ const ProgrammeAndFacilities = () =>
             level: 'All Levels',
             students: '500+',
             rating: 4.8,
-            price: '$299',
+            price: 'Rs.20,000/=',
             emoji: '🌐',
             heroImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -39,7 +40,7 @@ const ProgrammeAndFacilities = () =>
             level: 'Intermediate+',
             students: '200+',
             rating: 4.9,
-            price: '$899',
+            price: 'Rs.35,000/=',
             emoji: '💻',
             heroImage: 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1484417894907-623942c8ee29?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -59,7 +60,7 @@ const ProgrammeAndFacilities = () =>
             level: 'Beginner to Advanced',
             students: '350+',
             rating: 4.7,
-            price: '$599',
+            price: 'Rs.60,000/=',
             emoji: '🎓',
             heroImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -79,7 +80,7 @@ const ProgrammeAndFacilities = () =>
             level: 'All Levels',
             students: '150+',
             rating: 4.9,
-            price: '$399',
+            price: 'Rs.12,000/=',
             emoji: '⚡',
             heroImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -99,7 +100,7 @@ const ProgrammeAndFacilities = () =>
             level: 'Advanced',
             students: '300+',
             rating: 4.6,
-            price: '$249',
+            price: 'Rs.8,000/=',
             emoji: '📚',
             heroImage: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -119,7 +120,7 @@ const ProgrammeAndFacilities = () =>
             level: 'All Levels',
             students: '100+',
             rating: 5.0,
-            price: '$799',
+            price: 'Rs.225,000/=',
             emoji: '🏆',
             heroImage: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
             cardImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -258,7 +259,6 @@ const ProgrammeAndFacilities = () =>
                                         </div>
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span className="text-2xl font-bold text-blue-600">{program.price}</span>
                                         <Button
                                             onClick={() => setSelectedProgram(program)}
                                             className="bg-blue-600 hover:bg-blue-700"
@@ -272,6 +272,7 @@ const ProgrammeAndFacilities = () =>
                     </div>
                 </div>
             </div>
+            <FooterComponent />
         </div>
     );
 
@@ -360,6 +361,7 @@ const ProgrammeAndFacilities = () =>
                     </div>
                 </div>
             </div>
+            <FooterComponent />
         </div>
     );
 
@@ -611,6 +613,7 @@ const ProgrammeAndFacilities = () =>
                     </div>
                 </div>
             </div>
+            <FooterComponent />``
         </div>
     );
 

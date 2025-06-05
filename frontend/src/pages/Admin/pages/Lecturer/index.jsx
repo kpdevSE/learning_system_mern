@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "../../Components/AdminSidebar";
 import
 {
@@ -39,13 +39,17 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import
 {
+    ChevronDown,
     Search,
     MoreHorizontal,
     Trash2,
     Edit,
     Eye,
+    Download,
+    Filter,
     PlusCircle,
-    Activity
+    Activity,
+    Loader2
 } from "lucide-react";
 import
 {
@@ -54,179 +58,99 @@ import
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogFooter
+    DialogFooter,
+    DialogTrigger
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import axios from "axios";
 
-// Mock data for lecturers
-const mockLecturers = [
-    {
-        id: 1,
-        name: "Dr. John Davis",
-        email: "john.davis@example.edu",
-        lecturerId: "LC20230001",
-        joinDate: "2021-08-15",
-        department: "Computer Science",
-        coursesAssigned: 4,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 2,
-        name: "Prof. Sarah Martinez",
-        email: "s.martinez@example.edu",
-        lecturerId: "LC20230002",
-        joinDate: "2019-09-01",
-        department: "Business Administration",
-        coursesAssigned: 3,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 3,
-        name: "Dr. Robert Kim",
-        email: "r.kim@example.edu",
-        lecturerId: "LC20230003",
-        joinDate: "2020-01-10",
-        department: "Psychology",
-        coursesAssigned: 2,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 4,
-        name: "Dr. Amelia Patel",
-        email: "a.patel@example.edu",
-        lecturerId: "LC20230004",
-        joinDate: "2018-07-22",
-        department: "Medicine",
-        coursesAssigned: 0,
-        status: "Inactive",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 5,
-        name: "Prof. Thomas Johnson",
-        email: "t.johnson@example.edu",
-        lecturerId: "LC20230005",
-        joinDate: "2022-03-05",
-        department: "Engineering",
-        coursesAssigned: 5,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 6,
-        name: "Dr. Lisa Wong",
-        email: "l.wong@example.edu",
-        lecturerId: "LC20230006",
-        joinDate: "2020-06-15",
-        department: "Physics",
-        coursesAssigned: 3,
-        status: "On Leave",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 7,
-        name: "Prof. Mark Williams",
-        email: "m.williams@example.edu",
-        lecturerId: "LC20230007",
-        joinDate: "2017-08-01",
-        department: "Mathematics",
-        coursesAssigned: 4,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 8,
-        name: "Dr. Elena Petrova",
-        email: "e.petrova@example.edu",
-        lecturerId: "LC20230008",
-        joinDate: "2021-01-10",
-        department: "Literature",
-        coursesAssigned: 2,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 9,
-        name: "Prof. Daniel Lee",
-        email: "d.lee@example.edu",
-        lecturerId: "LC20230009",
-        joinDate: "2019-07-20",
-        department: "History",
-        coursesAssigned: 0,
-        status: "Inactive",
-        avatar: "/api/placeholder/32/32"
-    },
-    {
-        id: 10,
-        name: "Dr. Michelle Garcia",
-        email: "m.garcia@example.edu",
-        lecturerId: "LC20230010",
-        joinDate: "2018-09-05",
-        department: "Chemistry",
-        coursesAssigned: 3,
-        status: "Active",
-        avatar: "/api/placeholder/32/32"
-    }
-];
-
-export default function LecturerPage()
+export default function LecturePage()
 {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [lecturers, setLecturers] = useState(mockLecturers);
+    const [students, setStudents] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchTerm, setSearchTerm] = useState("");
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [lecturerToDelete, setLecturerToDelete] = useState(null);
+    const [studentToDelete, setStudentToDelete] = useState(null);
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const lecturersPerPage = 5;
-    const totalPages = Math.ceil(lecturers.length / lecturersPerPage);
+    const studentsPerPage = 5;
 
-    // Get current lecturers for pagination
-    const indexOfLastLecturer = currentPage * lecturersPerPage;
-    const indexOfFirstLecturer = indexOfLastLecturer - lecturersPerPage;
-    const filteredLecturers = lecturers.filter(lecturer =>
-        lecturer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lecturer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lecturer.lecturerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lecturer.department.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const currentLecturers = filteredLecturers.slice(indexOfFirstLecturer, indexOfLastLecturer);
+    // Fetch students from backend
+    useEffect(() =>
+    {
+        fetchStudents();
+    }, []);
+
+    const fetchStudents = async () =>
+    {
+        try
+        {
+            setLoading(true);
+            setError(null);
+            const response = await axios.get('http://localhost:5000/api/get/allteachers');
+            // Access the data array from the response
+            const studentsData = response.data.data;
+            // Ensure data is an array
+            setStudents(Array.isArray(studentsData) ? studentsData : []);
+            console.log('Fetched students:', studentsData);
+        } catch (err)
+        {
+            console.error('Error fetching students:', err);
+            setError('Failed to load students. Please try again.');
+            setStudents([]); // Set empty array on error
+        } finally
+        {
+            setLoading(false);
+        }
+    };
+
+    // Ensure students is always an array
+    const studentsArray = Array.isArray(students) ? students : [];
+    const totalPages = Math.ceil(studentsArray.length / studentsPerPage);
+
+    // Get current students for pagination
+    const indexOfLastStudent = currentPage * studentsPerPage;
+    const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
+    const currentStudents = studentsArray.slice(indexOfFirstStudent, indexOfLastStudent);
 
     // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-    // Handle search
-    const handleSearch = (e) =>
-    {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1);
-    };
-
     // Handle delete
-    const openDeleteDialog = (lecturer) =>
+    const openDeleteDialog = (student) =>
     {
-        setLecturerToDelete(lecturer);
+        setStudentToDelete(student);
         setDeleteDialogOpen(true);
     };
 
-    const confirmDelete = () =>
+    const confirmDelete = async () =>
     {
-        if (lecturerToDelete)
+        if (studentToDelete)
         {
-            setLecturers(lecturers.filter(lecturer => lecturer.id !== lecturerToDelete.id));
-            setDeleteDialogOpen(false);
-            setShowDeleteAlert(true);
-
-            // Hide the alert after 3 seconds
-            setTimeout(() =>
+            try
             {
-                setShowDeleteAlert(false);
-            }, 3000);
+                // Call your delete API endpoint using the student's _id
+                const response = await axios.delete(`http://localhost:5000/api/users/deletestudent/${studentToDelete._id}`);
+
+                // Remove student from local state
+                setStudents(students.filter(student => student._id !== studentToDelete._id));
+                setDeleteDialogOpen(false);
+                setShowDeleteAlert(true);
+
+                // Hide the alert after 3 seconds
+                setTimeout(() =>
+                {
+                    setShowDeleteAlert(false);
+                }, 3000);
+            } catch (err)
+            {
+                console.error('Error deleting student:', err);
+                setError('Failed to delete student. Please try again.');
+                setDeleteDialogOpen(false);
+            }
         }
     };
 
@@ -246,6 +170,12 @@ export default function LecturerPage()
         }
     };
 
+    // Format date helper
+    const formatDate = (dateString) =>
+    {
+        return new Date(dateString).toLocaleDateString();
+    };
+
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
             {/* Sidebar */}
@@ -260,7 +190,7 @@ export default function LecturerPage()
                             <Button variant="outline" size="icon" onClick={() => setIsCollapsed(!isCollapsed)}>
                                 <Activity className="h-5 w-5" />
                             </Button>
-                            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Lecturers Management</h1>
+                            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Lectures Management</h1>
                         </div>
                     </div>
                 </header>
@@ -273,7 +203,17 @@ export default function LecturerPage()
                             <Trash2 className="h-4 w-4" />
                             <AlertTitle>Success!</AlertTitle>
                             <AlertDescription>
-                                Lecturer has been successfully deleted.
+                                Student has been successfully deleted.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {/* Error alert */}
+                    {error && (
+                        <Alert className="mb-4 bg-red-50 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-100 dark:border-red-800">
+                            <AlertTitle>Error!</AlertTitle>
+                            <AlertDescription>
+                                {error}
                             </AlertDescription>
                         </Alert>
                     )}
@@ -282,23 +222,21 @@ export default function LecturerPage()
                         <CardHeader className="pb-2">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                                 <div>
-                                    <CardTitle>Lecturers Directory</CardTitle>
-                                    <CardDescription>Manage all lecturers in the system</CardDescription>
+                                    <CardTitle>Lectures Directory</CardTitle>
+                                    <CardDescription>Manage all Lectures in the system</CardDescription>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-2">
-                                    <div className="relative">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                                        <Input
-                                            type="search"
-                                            placeholder="Search lecturers..."
-                                            className="pl-8 w-full sm:w-64"
-                                            value={searchTerm}
-                                            onChange={handleSearch}
-                                        />
-                                    </div>
-                                    <Button className="bg-black hover:bg-black cursor-pointer">
-                                        <PlusCircle className="mr-2 h-4 w-4" />
-                                        Add Lecturer
+                                    <Button
+                                        className="bg-black hover:bg-black cursor-pointer"
+                                        onClick={fetchStudents}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                        )}
+                                        {loading ? 'Loading...' : 'Refresh'}
                                     </Button>
                                 </div>
                             </div>
@@ -310,35 +248,45 @@ export default function LecturerPage()
                                         <TableRow>
                                             <TableHead className="w-12"></TableHead>
                                             <TableHead>Name</TableHead>
-                                            <TableHead>ID</TableHead>
-                                            <TableHead className="hidden md:table-cell">Department</TableHead>
-                                            <TableHead className="hidden md:table-cell">Join Date</TableHead>
-                                            <TableHead className="hidden md:table-cell">Courses</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
+                                            <TableHead>Student ID</TableHead>
+                                            <TableHead className="hidden md:table-cell">Email</TableHead>
+                                            <TableHead className=" md:table-cell">Role</TableHead>
+                                            {/* <TableHead className="text-right">Actions</TableHead> */}
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {currentLecturers.length > 0 ? (
-                                            currentLecturers.map((lecturer) => (
-                                                <TableRow key={lecturer.id}>
+                                        {loading ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="text-center h-24">
+                                                    <div className="flex items-center justify-center">
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Loading students...
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : currentStudents.length > 0 ? (
+                                            currentStudents.map((student) => (
+                                                <TableRow key={student._id}>
                                                     <TableCell>
                                                         <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={lecturer.avatar} alt={lecturer.name} />
-                                                            <AvatarFallback>{lecturer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                                                            <AvatarImage src={student.avatar} alt={student.name} />
+                                                            <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                                         </Avatar>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="font-medium">{lecturer.name}</div>
-                                                        <div className="text-sm text-gray-500 dark:text-gray-400">{lecturer.email}</div>
+                                                        <div className="font-medium">{student.name}</div>
+                                                        <div className="text-sm text-gray-500 dark:text-gray-400">{student.email}</div>
                                                     </TableCell>
-                                                    <TableCell>{lecturer.lecturerId}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{lecturer.department}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{lecturer.joinDate}</TableCell>
-                                                    <TableCell className="hidden md:table-cell">{lecturer.coursesAssigned}</TableCell>
+                                                    <TableCell>{student._id}</TableCell>
+                                                    <TableCell className=" md:table-cell">{student.email}</TableCell>
                                                     <TableCell>
-                                                        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(lecturer.status)}`}>
-                                                            {lecturer.status}
+                                                        <Badge className="bg-green-100 text-green-800 hover:bg-green-200 text-xs">
+                                                            {student.role}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    {/* <TableCell>
+                                                        <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
+                                                            {student.status}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="text-right">
@@ -359,20 +307,20 @@ export default function LecturerPage()
                                                                 </DropdownMenuItem>
                                                                 <DropdownMenuItem
                                                                     className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
-                                                                    onClick={() => openDeleteDialog(lecturer)}
+                                                                    onClick={() => openDeleteDialog(student)}
                                                                 >
                                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                                     Delete
                                                                 </DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                 </TableRow>
                                             ))
                                         ) : (
                                             <TableRow>
-                                                <TableCell colSpan={8} className="text-center h-24">
-                                                    No lecturers found matching your search criteria.
+                                                <TableCell colSpan={7} className="text-center h-24">
+                                                    {error ? 'Error loading students.' : 'No students found.'}
                                                 </TableCell>
                                             </TableRow>
                                         )}
@@ -381,60 +329,62 @@ export default function LecturerPage()
                             </div>
 
                             {/* Pagination */}
-                            <div className="mt-4 flex items-center justify-between">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Showing {indexOfFirstLecturer + 1}-{Math.min(indexOfLastLecturer, filteredLecturers.length)} of {filteredLecturers.length} lecturers
-                                </p>
+                            {!loading && currentStudents.length > 0 && (
+                                <div className="mt-4 flex items-center justify-between">
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        Showing {indexOfFirstStudent + 1}-{Math.min(indexOfLastStudent, studentsArray.length)} of {studentsArray.length} Lectures
+                                    </p>
 
-                                <Pagination>
-                                    <PaginationContent>
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                onClick={() => currentPage > 1 && paginate(currentPage - 1)}
-                                                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                            />
-                                        </PaginationItem>
+                                    <Pagination>
+                                        <PaginationContent>
+                                            <PaginationItem>
+                                                <PaginationPrevious
+                                                    onClick={() => currentPage > 1 && paginate(currentPage - 1)}
+                                                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                />
+                                            </PaginationItem>
 
-                                        {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) =>
-                                        {
-                                            const pageNumber = index + 1;
-                                            return (
-                                                <PaginationItem key={index}>
-                                                    <PaginationLink
-                                                        onClick={() => paginate(pageNumber)}
-                                                        isActive={currentPage === pageNumber}
-                                                    >
-                                                        {pageNumber}
-                                                    </PaginationLink>
-                                                </PaginationItem>
-                                            );
-                                        })}
+                                            {Array.from({ length: Math.min(totalPages, 5) }).map((_, index) =>
+                                            {
+                                                const pageNumber = index + 1;
+                                                return (
+                                                    <PaginationItem key={index}>
+                                                        <PaginationLink
+                                                            onClick={() => paginate(pageNumber)}
+                                                            isActive={currentPage === pageNumber}
+                                                        >
+                                                            {pageNumber}
+                                                        </PaginationLink>
+                                                    </PaginationItem>
+                                                );
+                                            })}
 
-                                        {totalPages > 5 && (
-                                            <>
-                                                <PaginationItem>
-                                                    <PaginationEllipsis />
-                                                </PaginationItem>
-                                                <PaginationItem>
-                                                    <PaginationLink
-                                                        onClick={() => paginate(totalPages)}
-                                                        isActive={currentPage === totalPages}
-                                                    >
-                                                        {totalPages}
-                                                    </PaginationLink>
-                                                </PaginationItem>
-                                            </>
-                                        )}
+                                            {totalPages > 5 && (
+                                                <>
+                                                    <PaginationItem>
+                                                        <PaginationEllipsis />
+                                                    </PaginationItem>
+                                                    <PaginationItem>
+                                                        <PaginationLink
+                                                            onClick={() => paginate(totalPages)}
+                                                            isActive={currentPage === totalPages}
+                                                        >
+                                                            {totalPages}
+                                                        </PaginationLink>
+                                                    </PaginationItem>
+                                                </>
+                                            )}
 
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
-                                                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                                            />
-                                        </PaginationItem>
-                                    </PaginationContent>
-                                </Pagination>
-                            </div>
+                                            <PaginationItem>
+                                                <PaginationNext
+                                                    onClick={() => currentPage < totalPages && paginate(currentPage + 1)}
+                                                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                />
+                                            </PaginationItem>
+                                        </PaginationContent>
+                                    </Pagination>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </main>
@@ -446,7 +396,7 @@ export default function LecturerPage()
                     <DialogHeader>
                         <DialogTitle>Confirm Deletion</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {lecturerToDelete?.name}? This action cannot be undone.
+                            Are you sure you want to delete {studentToDelete?.name}? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -460,6 +410,6 @@ export default function LecturerPage()
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     );
 }

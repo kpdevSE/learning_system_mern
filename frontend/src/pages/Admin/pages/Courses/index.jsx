@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import AdminSidebar from "../../Components/AdminSidebar";
 import
 {
@@ -55,7 +57,8 @@ import
     Check,
     X,
     AlertCircle,
-    Filter
+    Filter,
+    Loader2
 } from "lucide-react";
 import
 {
@@ -70,194 +73,11 @@ import
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Mock data for courses
-const mockCourses = [
-    {
-        id: 1,
-        code: "CS101",
-        title: "Introduction to Computer Science",
-        instructor: "Dr. Alan Turing",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Computer Science",
-        credits: 3,
-        students: 45,
-        startDate: "2024-09-05",
-        endDate: "2024-12-20",
-        status: "Active",
-        description: "Fundamental concepts of computer science including programming, algorithms, and problem-solving.",
-        schedule: "Mon, Wed, Fri 10:00 AM - 11:30 AM"
-    },
-    {
-        id: 2,
-        code: "MATH201",
-        title: "Calculus II",
-        instructor: "Prof. Katherine Johnson",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Mathematics",
-        credits: 4,
-        students: 38,
-        startDate: "2024-09-06",
-        endDate: "2024-12-18",
-        status: "Active",
-        description: "Integration techniques, sequences and series, parametric equations, and polar coordinates.",
-        schedule: "Tue, Thu 9:00 AM - 11:00 AM"
-    },
-    {
-        id: 3,
-        code: "BIO150",
-        title: "Introduction to Biology",
-        instructor: "Dr. Rosalind Franklin",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Biology",
-        credits: 4,
-        students: 52,
-        startDate: "2024-09-04",
-        endDate: "2024-12-15",
-        status: "Active",
-        description: "Basic principles of cellular and molecular biology, genetics, and evolution.",
-        schedule: "Mon, Wed 1:00 PM - 2:30 PM, Fri 1:00 PM - 3:00 PM (Lab)"
-    },
-    {
-        id: 4,
-        code: "PHYS211",
-        title: "Physics for Scientists and Engineers",
-        instructor: "Dr. Richard Feynman",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Physics",
-        credits: 5,
-        students: 30,
-        startDate: "2024-09-05",
-        endDate: "2024-12-19",
-        status: "Active",
-        description: "Mechanics, kinematics, and dynamics of particles and rigid bodies.",
-        schedule: "Tue, Thu 1:00 PM - 3:00 PM, Wed 3:00 PM - 5:00 PM (Lab)"
-    },
-    {
-        id: 5,
-        code: "ENG102",
-        title: "Academic Writing",
-        instructor: "Prof. Maya Angelou",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "English",
-        credits: 3,
-        students: 25,
-        startDate: "2024-09-03",
-        endDate: "2024-12-14",
-        status: "Active",
-        description: "Development of critical thinking and writing skills for academic discourse.",
-        schedule: "Mon, Wed, Fri 2:00 PM - 3:00 PM"
-    },
-    {
-        id: 6,
-        code: "CHEM110",
-        title: "General Chemistry",
-        instructor: "Dr. Marie Curie",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Chemistry",
-        credits: 4,
-        students: 40,
-        startDate: "2024-09-04",
-        endDate: "2024-12-16",
-        status: "Active",
-        description: "Atomic structure, periodic properties, chemical bonding, and states of matter.",
-        schedule: "Tue, Thu 10:00 AM - 11:30 AM, Thu 2:00 PM - 5:00 PM (Lab)"
-    },
-    {
-        id: 7,
-        code: "PSYC101",
-        title: "Introduction to Psychology",
-        instructor: "Dr. Carl Jung",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Psychology",
-        credits: 3,
-        students: 60,
-        startDate: "2024-09-06",
-        endDate: "2024-12-18",
-        status: "Active",
-        description: "Overview of human behavior and mental processes.",
-        schedule: "Mon, Wed 11:00 AM - 12:30 PM"
-    },
-    {
-        id: 8,
-        code: "HIST205",
-        title: "World History: 1500-Present",
-        instructor: "Prof. Howard Zinn",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "History",
-        credits: 3,
-        students: 35,
-        startDate: "2024-09-05",
-        endDate: "2024-12-17",
-        status: "Inactive",
-        description: "Global historical developments and interactions from 1500 to the present.",
-        schedule: "Tue, Thu 3:00 PM - 4:30 PM"
-    },
-    {
-        id: 9,
-        code: "ECON201",
-        title: "Principles of Microeconomics",
-        instructor: "Dr. Adam Smith",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Economics",
-        credits: 3,
-        students: 48,
-        startDate: "2024-09-03",
-        endDate: "2024-12-15",
-        status: "Active",
-        description: "Introduction to economic principles focusing on individual decision-making units.",
-        schedule: "Mon, Wed, Fri 9:00 AM - 10:00 AM"
-    },
-    {
-        id: 10,
-        code: "ART120",
-        title: "Introduction to Drawing",
-        instructor: "Prof. Frida Kahlo",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Fine Arts",
-        credits: 3,
-        students: 22,
-        startDate: "2024-09-04",
-        endDate: "2024-12-16",
-        status: "Pending",
-        description: "Fundamental drawing techniques focusing on observation and expression.",
-        schedule: "Tue, Thu 1:00 PM - 3:00 PM"
-    },
-    {
-        id: 11,
-        code: "CS301",
-        title: "Database Systems",
-        instructor: "Dr. Ada Lovelace",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Computer Science",
-        credits: 4,
-        students: 32,
-        startDate: "2024-09-06",
-        endDate: "2024-12-19",
-        status: "Active",
-        description: "Design and implementation of database systems, focusing on relational models and SQL.",
-        schedule: "Mon, Wed 3:00 PM - 4:30 PM, Fri 3:00 PM - 5:00 PM (Lab)"
-    },
-    {
-        id: 12,
-        code: "PHIL202",
-        title: "Ethics",
-        instructor: "Prof. John Rawls",
-        instructorAvatar: "/api/placeholder/32/32",
-        department: "Philosophy",
-        credits: 3,
-        students: 28,
-        startDate: "2024-09-03",
-        endDate: "2024-12-14",
-        status: "Cancelled",
-        description: "Examination of major ethical theories and their application to contemporary issues.",
-        schedule: "Tue, Thu 11:00 AM - 12:30 PM"
-    }
-];
-
 export default function CoursesPage()
 {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [courses, setCourses] = useState(mockCourses);
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("all");
@@ -266,17 +86,103 @@ export default function CoursesPage()
     const [showDeleteAlert, setShowDeleteAlert] = useState(false);
     const [viewCourseDetails, setViewCourseDetails] = useState(null);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
+    const [courseDetails, setCourseDetails] = useState(null);
+    const [detailsLoading, setDetailsLoading] = useState(false);
 
     const coursesPerPage = 6;
+
+    // Fetch all courses
+    const fetchCourses = async () =>
+    {
+        try
+        {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:5000/api/users/allcourses', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            setCourses(response.data.data);
+        } catch (error)
+        {
+            console.error('Error fetching courses:', error);
+            toast.error('Failed to fetch courses');
+        } finally
+        {
+            setLoading(false);
+        }
+    };
+
+    // Fetch course details
+    const fetchCourseDetails = async (courseId) =>
+    {
+        try
+        {
+            setDetailsLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:5000/api/users/courses/${courseId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            setCourseDetails(response.data.data);
+        } catch (error)
+        {
+            console.error('Error fetching course details:', error);
+            toast.error('Failed to fetch course details');
+        } finally
+        {
+            setDetailsLoading(false);
+        }
+    };
+
+    // Delete course
+    const handleDelete = async (courseId) =>
+    {
+        try
+        {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(`http://localhost:5000/api/users/courses/${courseId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+
+            if (response.status === 200)
+            {
+                toast.success("Course deleted successfully!");
+                // Remove the deleted course from state instead of reloading
+                setCourses(courses.filter(course => course._id !== courseId));
+                setDeleteDialogOpen(false);
+                setShowDeleteAlert(true);
+
+                // Hide alert after 3 seconds
+                setTimeout(() =>
+                {
+                    setShowDeleteAlert(false);
+                }, 3000);
+            }
+        } catch (error)
+        {
+            console.error("Error deleting course:", error);
+            toast.error("Failed to delete course.");
+        }
+    };
+
+    // Initial data fetch
+    useEffect(() =>
+    {
+        fetchCourses();
+    }, []);
 
     // Filter courses based on search and active tab
     const filteredCourses = courses.filter(course =>
     {
         const matchesSearch =
-            course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course.instructor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course.department.toLowerCase().includes(searchTerm.toLowerCase());
+            course.topicTwo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.topicOne.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            course.lecturerEmail.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesTab =
             activeTab === "all" ||
@@ -310,7 +216,7 @@ export default function CoursesPage()
         setCurrentPage(1);
     };
 
-    // Handle delete
+    // Handle delete dialog
     const openDeleteDialog = (course) =>
     {
         setCourseToDelete(course);
@@ -321,23 +227,25 @@ export default function CoursesPage()
     {
         if (courseToDelete)
         {
-            setCourses(courses.filter(course => course.id !== courseToDelete.id));
-            setDeleteDialogOpen(false);
-            setShowDeleteAlert(true);
-
-            // Hide the alert after 3 seconds
-            setTimeout(() =>
-            {
-                setShowDeleteAlert(false);
-            }, 3000);
+            handleDelete(courseToDelete._id);
         }
     };
 
     // Handle view details
-    const openViewDialog = (course) =>
+    const openViewDialog = async (course) =>
     {
         setViewCourseDetails(course);
         setViewDialogOpen(true);
+        await fetchCourseDetails(course._id);
+    };
+
+    // Add new function to handle dialog close
+    const handleViewDialogClose = () =>
+    {
+        setViewDialogOpen(false);
+        setViewCourseDetails(null);
+        setCourseDetails(null);
+        setDetailsLoading(false);
     };
 
     // Status badge color
@@ -376,12 +284,33 @@ export default function CoursesPage()
         }
     };
 
+    // Format date helper
+    const formatDate = (dateString) =>
+    {
+        if (!dateString) return 'N/A';
+        return new Date(dateString).toLocaleDateString();
+    };
+
+    // Loading state
+    if (loading)
+    {
+        return (
+            <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+                <AdminSidebar />
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex items-center space-x-2">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                        <span className="text-lg">Loading courses...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
             {/* Sidebar */}
-
             <AdminSidebar />
-
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -410,6 +339,7 @@ export default function CoursesPage()
                         </Alert>
                     )}
 
+                    {/* Statistics Cards */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-4">
                         <Card>
                             <CardContent className="p-6 flex items-center space-x-4">
@@ -430,7 +360,7 @@ export default function CoursesPage()
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Courses</p>
-                                    <h3 className="text-2xl font-bold">{courses.filter(c => c.status === "Active").length}</h3>
+                                    <h3 className="text-2xl font-bold">{courses.length}</h3>
                                 </div>
                             </CardContent>
                         </Card>
@@ -441,8 +371,8 @@ export default function CoursesPage()
                                     <Users className="h-6 w-6 text-amber-600 dark:text-amber-300" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Students</p>
-                                    <h3 className="text-2xl font-bold">{courses.reduce((sum, course) => sum + course.students, 0)}</h3>
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Revenue</p>
+                                    <h3 className="text-2xl font-bold">Rs.{courses.reduce((sum, course) => sum + (course.price || 0), 0).toLocaleString()}</h3>
                                 </div>
                             </CardContent>
                         </Card>
@@ -453,8 +383,8 @@ export default function CoursesPage()
                                     <Calendar className="h-6 w-6 text-purple-600 dark:text-purple-300" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Departments</p>
-                                    <h3 className="text-2xl font-bold">{new Set(courses.map(c => c.department)).size}</h3>
+                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Lessons</p>
+                                    <h3 className="text-2xl font-bold">{courses.reduce((sum, course) => sum + (course.lessonsQuantity || 0), 0)}</h3>
                                 </div>
                             </CardContent>
                         </Card>
@@ -478,7 +408,6 @@ export default function CoursesPage()
                                             onChange={handleSearch}
                                         />
                                     </div>
-
                                 </div>
                             </div>
                         </CardHeader>
@@ -487,318 +416,93 @@ export default function CoursesPage()
                             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                                 <TabsList className="grid grid-cols-4 mb-4">
                                     <TabsTrigger value="all">All Courses</TabsTrigger>
-                                    <TabsTrigger value="active">Active</TabsTrigger>
-                                    <TabsTrigger value="pending">Pending</TabsTrigger>
-                                    <TabsTrigger value="inactive">Inactive</TabsTrigger>
                                 </TabsList>
-                                <TabsContent value="all" className="mt-0">
-                                    <div className="rounded-md border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Course</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Department</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Instructor</TableHead>
-                                                    <TableHead>Students</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead className="text-right">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {currentCourses.length > 0 ? (
-                                                    currentCourses.map((course) => (
-                                                        <TableRow key={course.id}>
-                                                            <TableCell>
-                                                                <div className="font-medium">{course.title}</div>
-                                                                <div className="text-sm text-gray-500 dark:text-gray-400">{course.code}</div>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell">{course.department}</TableCell>
-                                                            <TableCell className="hidden md:table-cell">
-                                                                <div className="flex items-center">
-                                                                    <Avatar className="h-6 w-6 mr-2">
-                                                                        <AvatarImage src={course.instructorAvatar} alt={course.instructor} />
-                                                                        <AvatarFallback>{course.instructor.substring(0, 2)}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    {course.instructor}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>{course.students}</TableCell>
-                                                            <TableCell>
-                                                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                                                                    <span className="mr-1">{getStatusIcon(course.status)}</span>
-                                                                    {course.status}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" size="icon">
-                                                                            <MoreHorizontal className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem className="cursor-pointer" onClick={() => openViewDialog(course)}>
-                                                                            <Eye className="mr-2 h-4 w-4" />
-                                                                            View Details
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem className="cursor-pointer">
-                                                                            <Edit className="mr-2 h-4 w-4" />
-                                                                            Edit
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem
-                                                                            className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
-                                                                            onClick={() => openDeleteDialog(course)}
-                                                                        >
-                                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                                            Delete
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
+
+                                {/* All tabs share the same table structure */}
+                                {['all'].map(tabValue => (
+                                    <TabsContent key={tabValue} value={tabValue} className="mt-0">
+                                        <div className="rounded-md border">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Course</TableHead>
+                                                        <TableHead className="hidden md:table-cell">Instructor</TableHead>
+                                                        <TableHead className="hidden md:table-cell">Price</TableHead>
+                                                        <TableHead>Lessons</TableHead>
+                                                        <TableHead>Status</TableHead>
+                                                        <TableHead className="text-right">Actions</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {currentCourses.length > 0 ? (
+                                                        currentCourses.map((course) => (
+                                                            <TableRow key={course._id}>
+                                                                <TableCell>
+                                                                    <div className="flex items-center space-x-3">
+                                                                        <img
+                                                                            src={course.imageUrl || '/api/placeholder/40/40'}
+                                                                            alt={course.topicTwo || course.smallDescription}
+                                                                            className="w-10 h-10 rounded object-cover"
+                                                                        />
+                                                                        <div>
+                                                                            <div className="font-medium">{course.topicTwo || course.smallDescription || 'Untitled Course'}</div>
+                                                                            <div className="text-sm text-gray-500 dark:text-gray-400">{course.topicOne || 'N/A'}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell className="hidden md:table-cell">
+                                                                    <div className="flex items-center">
+                                                                        <Avatar className="h-6 w-6 mr-2">
+                                                                            <AvatarImage src={course.imageUrl} alt={course.lecturerEmail} />
+                                                                            <AvatarFallback>{course.lecturerEmail?.substring(0, 2).toUpperCase() || 'NA'}</AvatarFallback>
+                                                                        </Avatar>
+                                                                        {course.lecturerEmail || 'Unknown Instructor'}
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell className="hidden md:table-cell">${course.price || 0}</TableCell>
+                                                                <TableCell>{course.lessonsQuantity || 0}</TableCell>
+                                                                <TableCell>
+                                                                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                                                        <span className="mr-1"><Check className="h-4 w-4 text-green-600" /></span>
+                                                                        Active
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell className="text-right">
+                                                                    <DropdownMenu>
+                                                                        <DropdownMenuTrigger asChild>
+                                                                            <Button variant="ghost" size="icon">
+                                                                                <MoreHorizontal className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </DropdownMenuTrigger>
+                                                                        <DropdownMenuContent align="end">
+                                                                            <DropdownMenuItem className="cursor-pointer" onClick={() => openViewDialog(course)}>
+                                                                                <Eye className="mr-2 h-4 w-4" />
+                                                                                View Details
+                                                                            </DropdownMenuItem>
+                                                                            <DropdownMenuItem
+                                                                                className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
+                                                                                onClick={() => openDeleteDialog(course)}
+                                                                            >
+                                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                                Delete
+                                                                            </DropdownMenuItem>
+                                                                        </DropdownMenuContent>
+                                                                    </DropdownMenu>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    ) : (
+                                                        <TableRow>
+                                                            <TableCell colSpan={6} className="text-center h-24">
+                                                                No courses found matching your search criteria.
                                                             </TableCell>
                                                         </TableRow>
-                                                    ))
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="text-center h-24">
-                                                            No courses found matching your search criteria.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </TabsContent>
-                                <TabsContent value="active" className="mt-0">
-                                    <div className="rounded-md border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Course</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Department</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Instructor</TableHead>
-                                                    <TableHead>Students</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead className="text-right">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {currentCourses.length > 0 ? (
-                                                    currentCourses.map((course) => (
-                                                        <TableRow key={course.id}>
-                                                            <TableCell>
-                                                                <div className="font-medium">{course.title}</div>
-                                                                <div className="text-sm text-gray-500 dark:text-gray-400">{course.code}</div>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell">{course.department}</TableCell>
-                                                            <TableCell className="hidden md:table-cell">
-                                                                <div className="flex items-center">
-                                                                    <Avatar className="h-6 w-6 mr-2">
-                                                                        <AvatarImage src={course.instructorAvatar} alt={course.instructor} />
-                                                                        <AvatarFallback>{course.instructor.substring(0, 2)}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    {course.instructor}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>{course.students}</TableCell>
-                                                            <TableCell>
-                                                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                                                                    <span className="mr-1">{getStatusIcon(course.status)}</span>
-                                                                    {course.status}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" size="icon">
-                                                                            <MoreHorizontal className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem className="cursor-pointer" onClick={() => openViewDialog(course)}>
-                                                                            <Eye className="mr-2 h-4 w-4" />
-                                                                            View Details
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem className="cursor-pointer">
-                                                                            <Edit className="mr-2 h-4 w-4" />
-                                                                            Edit
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem
-                                                                            className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
-                                                                            onClick={() => openDeleteDialog(course)}
-                                                                        >
-                                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                                            Delete
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="text-center h-24">
-                                                            No active courses found matching your search criteria.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </TabsContent>
-                                <TabsContent value="pending" className="mt-0">
-                                    <div className="rounded-md border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Course</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Department</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Instructor</TableHead>
-                                                    <TableHead>Students</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead className="text-right">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {currentCourses.length > 0 ? (
-                                                    currentCourses.map((course) => (
-                                                        <TableRow key={course.id}>
-                                                            <TableCell>
-                                                                <div className="font-medium">{course.title}</div>
-                                                                <div className="text-sm text-gray-500 dark:text-gray-400">{course.code}</div>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell">{course.department}</TableCell>
-                                                            <TableCell className="hidden md:table-cell">
-                                                                <div className="flex items-center">
-                                                                    <Avatar className="h-6 w-6 mr-2">
-                                                                        <AvatarImage src={course.instructorAvatar} alt={course.instructor} />
-                                                                        <AvatarFallback>{course.instructor.substring(0, 2)}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    {course.instructor}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>{course.students}</TableCell>
-                                                            <TableCell>
-                                                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                                                                    <span className="mr-1">{getStatusIcon(course.status)}</span>
-                                                                    {course.status}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" size="icon">
-                                                                            <MoreHorizontal className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem className="cursor-pointer" onClick={() => openViewDialog(course)}>
-                                                                            <Eye className="mr-2 h-4 w-4" />
-                                                                            View Details
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem className="cursor-pointer">
-                                                                            <Edit className="mr-2 h-4 w-4" />
-                                                                            Edit
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem
-                                                                            className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
-                                                                            onClick={() => openDeleteDialog(course)}
-                                                                        >
-                                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                                            Delete
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="text-center h-24">
-                                                            No pending courses found matching your search criteria.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </TabsContent>
-                                <TabsContent value="inactive" className="mt-0">
-                                    <div className="rounded-md border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Course</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Department</TableHead>
-                                                    <TableHead className="hidden md:table-cell">Instructor</TableHead>
-                                                    <TableHead>Students</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead className="text-right">Actions</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {currentCourses.length > 0 ? (
-                                                    currentCourses.map((course) => (
-                                                        <TableRow key={course.id}>
-                                                            <TableCell>
-                                                                <div className="font-medium">{course.title}</div>
-                                                                <div className="text-sm text-gray-500 dark:text-gray-400">{course.code}</div>
-                                                            </TableCell>
-                                                            <TableCell className="hidden md:table-cell">{course.department}</TableCell>
-                                                            <TableCell className="hidden md:table-cell">
-                                                                <div className="flex items-center">
-                                                                    <Avatar className="h-6 w-6 mr-2">
-                                                                        <AvatarImage src={course.instructorAvatar} alt={course.instructor} />
-                                                                        <AvatarFallback>{course.instructor.substring(0, 2)}</AvatarFallback>
-                                                                    </Avatar>
-                                                                    {course.instructor}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell>{course.students}</TableCell>
-                                                            <TableCell>
-                                                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                                                                    <span className="mr-1">{getStatusIcon(course.status)}</span>
-                                                                    {course.status}
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                <DropdownMenu>
-                                                                    <DropdownMenuTrigger asChild>
-                                                                        <Button variant="ghost" size="icon">
-                                                                            <MoreHorizontal className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </DropdownMenuTrigger>
-                                                                    <DropdownMenuContent align="end">
-                                                                        <DropdownMenuItem className="cursor-pointer" onClick={() => openViewDialog(course)}>
-                                                                            <Eye className="mr-2 h-4 w-4" />
-                                                                            View Details
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem className="cursor-pointer">
-                                                                            <Edit className="mr-2 h-4 w-4" />
-                                                                            Edit
-                                                                        </DropdownMenuItem>
-                                                                        <DropdownMenuItem
-                                                                            className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-700 dark:focus:text-red-300"
-                                                                            onClick={() => openDeleteDialog(course)}
-                                                                        >
-                                                                            <Trash2 className="mr-2 h-4 w-4" />
-                                                                            Delete
-                                                                        </DropdownMenuItem>
-                                                                    </DropdownMenuContent>
-                                                                </DropdownMenu>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ))
-                                                ) : (
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="text-center h-24">
-                                                            No inactive courses found matching your search criteria.
-                                                        </TableCell>
-                                                    </TableRow>
-                                                )}
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                </TabsContent>
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </TabsContent>
+                                ))}
                             </Tabs>
                         </CardContent>
 
@@ -825,6 +529,7 @@ export default function CoursesPage()
                                                 <PaginationLink
                                                     onClick={() => paginate(pageNumber)}
                                                     isActive={currentPage === pageNumber}
+                                                    className="cursor-pointer"
                                                 >
                                                     {pageNumber}
                                                 </PaginationLink>
@@ -841,6 +546,7 @@ export default function CoursesPage()
                                                 <PaginationLink
                                                     onClick={() => paginate(totalPages)}
                                                     isActive={currentPage === totalPages}
+                                                    className="cursor-pointer"
                                                 >
                                                     {totalPages}
                                                 </PaginationLink>
@@ -867,7 +573,7 @@ export default function CoursesPage()
                     <DialogHeader>
                         <DialogTitle>Confirm Deletion</DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to delete {courseToDelete?.title} ({courseToDelete?.code})? This action cannot be undone.
+                            Are you sure you want to delete "{courseToDelete?.topicTwo}"? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
@@ -883,8 +589,8 @@ export default function CoursesPage()
             </Dialog>
 
             {/* Course Details Dialog */}
-            <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-                <DialogContent className="sm:max-w-lg">
+            <Dialog open={viewDialogOpen} onOpenChange={handleViewDialogClose}>
+                <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Course Details</DialogTitle>
                         <DialogDescription>
@@ -892,80 +598,93 @@ export default function CoursesPage()
                         </DialogDescription>
                     </DialogHeader>
 
-                    {viewCourseDetails && (
+                    {detailsLoading ? (
+                        <div className="flex items-center justify-center p-8">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                        </div>
+                    ) : viewCourseDetails && (
                         <div className="space-y-4 mt-2">
                             <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-lg font-semibold">{viewCourseDetails.title}</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Code: {viewCourseDetails.code}</p>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold">{viewCourseDetails.topicTwo || viewCourseDetails.smallDescription || 'Untitled Course'}</h3>
+                                    <p className="text-sm text-muted-foreground">Code: {viewCourseDetails.topicOne || 'N/A'}</p>
                                 </div>
-                                <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(viewCourseDetails.status)}`}>
-                                    <span className="mr-1">{getStatusIcon(viewCourseDetails.status)}</span>
-                                    {viewCourseDetails.status}
-                                </div>
+                                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    <Check className="h-4 w-4 mr-1" />
+                                    Active
+                                </Badge>
                             </div>
+
+                            {viewCourseDetails.imageUrl && (
+                                <div className="w-full">
+                                    <img
+                                        src={viewCourseDetails.imageUrl}
+                                        alt={viewCourseDetails.topicTwo || viewCourseDetails.smallDescription}
+                                        className="w-full h-48 object-cover rounded-lg border"
+                                    />
+                                </div>
+                            )}
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
-                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Department</p>
-                                        <p>{viewCourseDetails.department}</p>
+                                        <p className="text-sm font-medium text-muted-foreground">Price</p>
+                                        <p className="text-lg font-semibold">${viewCourseDetails.price || 0}</p>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Credits</p>
-                                        <p>{viewCourseDetails.credits}</p>
+                                        <p className="text-sm font-medium text-muted-foreground">Lessons</p>
+                                        <p className="text-lg font-semibold">{viewCourseDetails.lessonsQuantity || 0}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Instructor</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Instructor</p>
                                     <div className="flex items-center mt-1">
                                         <Avatar className="h-8 w-8 mr-2">
-                                            <AvatarImage src={viewCourseDetails.instructorAvatar} alt={viewCourseDetails.instructor} />
-                                            <AvatarFallback>{viewCourseDetails.instructor.substring(0, 2)}</AvatarFallback>
+                                            <AvatarImage src={viewCourseDetails.imageUrl} alt={viewCourseDetails.lecturerEmail} />
+                                            <AvatarFallback>{viewCourseDetails.lecturerEmail?.substring(0, 2).toUpperCase() || 'NA'}</AvatarFallback>
                                         </Avatar>
-                                        <p>{viewCourseDetails.instructor}</p>
+                                        <p className="text-sm">{viewCourseDetails.lecturerEmail || 'Unknown Instructor'}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Course Timeline</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Duration</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
-                                        <p>{viewCourseDetails.startDate} to {viewCourseDetails.endDate}</p>
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <p className="text-sm">{viewCourseDetails.duration || 'N/A'}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Schedule</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Published Date</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Clock className="h-4 w-4 text-gray-500" />
-                                        <p>{viewCourseDetails.schedule}</p>
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <p className="text-sm">{formatDate(viewCourseDetails.publishedAt)}</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Enrolled Students</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Users className="h-4 w-4 text-gray-500" />
-                                        <p>{viewCourseDetails.students} students</p>
+                                {viewCourseDetails.youtubeUrl && (
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">Preview Video</p>
+                                        <a
+                                            href={viewCourseDetails.youtubeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary hover:text-primary/80 text-sm break-all underline-offset-4 hover:underline"
+                                        >
+                                            {viewCourseDetails.youtubeUrl}
+                                        </a>
                                     </div>
-                                </div>
+                                )}
 
                                 <div>
-                                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</p>
-                                    <p className="mt-1 text-sm">{viewCourseDetails.description}</p>
+                                    <p className="text-sm font-medium text-muted-foreground">Description</p>
+                                    <p className="mt-1 text-sm text-foreground">{viewCourseDetails.fullDescription || viewCourseDetails.smallDescription || 'No description available'}</p>
                                 </div>
                             </div>
                         </div>
                     )}
-
-                    <DialogFooter className="flex space-x-2 justify-end">
-                        <Button className="bg-black hover:bg-black cursor-pointer" onClick={() => setViewDialogOpen(false)}>
-                            Close
-                        </Button>
-
-                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

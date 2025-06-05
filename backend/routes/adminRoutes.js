@@ -8,6 +8,7 @@ const {
     deleteUser
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
+const { getAllStudentsFunction } = require('../controllers/userController');
 
 // Use auth middleware for all admin routes
 router.use(protect);
@@ -22,5 +23,7 @@ router.route('/users/:id')
     .get(getUser)
     .put(updateUser)
     .delete(deleteUser);
+
+router.get('/allstudents', getAllStudentsFunction)
 
 module.exports = router;
