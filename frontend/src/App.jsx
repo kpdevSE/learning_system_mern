@@ -26,6 +26,7 @@ import Courses from './pages/Students/Pages/Courses/index.jsx';
 import Payement from './pages/Students/Pages/Payment/index.jsx';
 import StudentProfilePage from './pages/Students/Pages/Profile/index.jsx';
 import CourseMaterialsPage from './pages/Students/Pages/CourseMaterials/index.jsx';
+import ProgrammeAndFacilities from './pages/ProgrammeAndFacilities/index.jsx';
 
 
 
@@ -67,6 +68,10 @@ function App()
             <Route path='/student/payments' element={<Payement />} />
             <Route path='/student/profile' element={<StudentProfilePage />} />
             <Route path='/student/course-materials' element={<CourseMaterialsPage />} />
+
+            {/* Programme and Facilities Routes */}
+            <Route path='/programme-and-facilities' element={<ProgrammeAndFacilities />} />
+
 
             {/* Add a catch-all route for 404 errors */}
             <Route path="*" element={
