@@ -9,6 +9,8 @@ import DataScience from '../../assets/datascience.jpg'
 import Girl from '../../assets/girl.jpg'
 import Boy from '../../assets/boy.jpg'
 import FooterComponent from '@/components/ui/Components/Footer';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 
 export default function LMSLandingPage()
@@ -157,9 +159,17 @@ export default function LMSLandingPage()
                         ))}
                     </div>
                     <div className="mt-10 text-center">
-                        <a href="#" className="inline-flex items-center text-black hover:black font-medium">
-                            View all courses <ArrowRight className="ml-2 h-4 w-4" />
-                        </a>
+                        <Link to='/programme-and-facilities'>
+                            <Button
+                                className="inline-flex items-center bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 hover:border-gray-300 font-semibold px-6 py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 group cursor-pointer"
+                            >
+                                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg mr-3">
+                                    <BookOpen className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <span className="flex-1 text-left">View All Courses</span>
+                                <ArrowRight className="ml-2 h-4 w-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200" />
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
