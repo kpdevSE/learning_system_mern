@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Menu, X, Home, Settings, Users, BarChart2, HelpCircle, Book, LogOut, Calendar, BookOpen, Upload, DollarSign, Star, Clipboard } from 'lucide-react';
+import { Menu, X, Home, Settings, Users, BarChart2, HelpCircle, Book, LogOut, Calendar, BookOpen, Upload, DollarSign, Star, Clipboard, BookCheckIcon, Mail } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Separator } from '../../../components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
@@ -14,7 +13,6 @@ export default function LecturerSidebar()
     const [user, setUser] = useState({})
     const navigate = useNavigate();
 
-    // Menu items for the sidebar
     const menuItems = [
         { icon: Home, name: "Dashboard", path: "/lecturer/dashboard" },
         { icon: Users, name: "Profile", path: "/lecturer/profile" },

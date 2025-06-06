@@ -27,6 +27,8 @@ import Payement from './pages/Students/Pages/Payment/index.jsx';
 import StudentProfilePage from './pages/Students/Pages/Profile/index.jsx';
 import CourseMaterialsPage from './pages/Students/Pages/CourseMaterials/index.jsx';
 import ProgrammeAndFacilities from './pages/ProgrammeAndFacilities/index.jsx';
+import ExamManagementSystem from './pages/Lecturer/Pages/Exams/index.jsx';
+import MailPage from './pages/Lecturer/Pages/Mail/index.jsx';
 
 
 
@@ -60,6 +62,7 @@ function App()
             <Route path='/lecturer/assessments' element={<AssessmentsPage />} />
             <Route path='/lecturer/earnings' element={<EarningsPage />} />
             <Route path='/lecturer/reviews' element={<ReviewsPage />} />
+            <Route path='/lecturer/mails' element={<MailPage />} />
 
             {/* Student Routes */}
             <Route path='/student/dashboard' element={<StudentDashboard />} />
