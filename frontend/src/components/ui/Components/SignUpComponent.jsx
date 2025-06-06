@@ -74,7 +74,7 @@ export default function RegisterComponent()
                 const role = response.data.user.role;
                 if (role === "admin")
                 {
-                    window.location.href = "/admin/dashboard";
+                    window.location.href = "/admin/courses";
                 } else if (role === "teacher")
                 {
                     window.location.href = "/lecturer/dashboard";

@@ -12,10 +12,9 @@ export default function AdminSidebar()
 
     // Menu items for the sidebar
     const menuItems = [
-        { icon: Home, label: 'Dashboard', path: '/admin/dashboard' },
+        { icon: Book, label: 'Courses', path: '/admin/courses' },
         { icon: Users, label: 'Students', path: '/admin/students' },
         { icon: Users, label: 'Lecturer', path: '/admin/lecturer' },
-        { icon: Book, label: 'Courses', path: '/admin/courses' },
         { icon: BarChart2, label: 'Analytics', path: '/admin/analytics' },
 
     ];
@@ -109,7 +108,6 @@ export default function AdminSidebar()
                         <Separator className="my-2" />
 
                         <div className="flex items-center pt-2">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700" />
                             <div className="ml-3">
                                 <p className="text-sm font-medium">Admin</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400">admin@example.com</p>

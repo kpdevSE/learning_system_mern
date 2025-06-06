@@ -107,6 +107,33 @@ exports.getAllCoursesByLecturerEmail = async (req, res) =>
     }
 };
 
+exports.getAllPayments = async (req, res) =>
+{
+    try
+    {
+        const courses = await Payement.find();
+
+        // Calculate total amount
+        const totalAmount = courses.reduce((sum, course) =>
+        {
+            return sum + parseFloat(course.savedPrice || 0);
+        }, 0);
+
+        res.status(200).json({
+            message: "Lecturer's courses retrieved successfully",
+            data: courses,
+            totalAmount: totalAmount,
+            totalCourses: courses.length
+        });
+    } catch (error)
+    {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 
 // Get Payments Couunt
@@ -131,3 +158,4 @@ exports.getPayementCountToLecturer = async (req, res) =>
         res.status(500).json({ success: false, message: err.message });
     }
 }
+

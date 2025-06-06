@@ -5,7 +5,7 @@ const { protect } = require('../middleware/auth');
 const { getteacherProfile, addProfile, getteacherProfiles } = require('../controllers/teacherProfileController');
 const { createCourse, getallCoursesByEmail, getallCourses, getCourseById, deleteCourseById, updateCourseById, getCourseDetailsForStudents, getCoursesCount } = require('../controllers/courseController');
 const { addProfileStudent, getStudentProfile } = require('../controllers/studentProfileController');
-const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer, getAllCoursesByLecturerEmail } = require('../controllers/payementController');
+const { makePayment, getAllCoursesByPurchasingEmail, getPayementCountToLecturer, getAllCoursesByLecturerEmail, getAllPayments } = require('../controllers/payementController');
 const { getNotificationsByRole, sendNotification, getStudentNotificationCount, getteachersNotificationsCount } = require('../controllers/notificationsController');
 const { getAllPDFs, deletePDF, getAllPDFsByEmail, uploadPDF } = require('../controllers/pdfController');
 const { createReview, getLecturerReviews, getAllReviews, getLecturerReviewsDetails } = require('../controllers/reviewsController');
@@ -43,6 +43,7 @@ router.post('/payement', makePayment)
 router.get('/purchased/courses', getAllCoursesByPurchasingEmail)
 router.get('/countofpayement', getPayementCountToLecturer)
 router.get('/getpayementdetails', getAllCoursesByLecturerEmail)
+router.get('/allpayments', getAllPayments)
 
 
 // Notifications
