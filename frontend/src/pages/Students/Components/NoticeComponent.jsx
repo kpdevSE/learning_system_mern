@@ -53,7 +53,7 @@ export default function NoticeComponent()
                 </DialogHeader>
                 <DialogFooter className="mt-4">
                     <DialogClose asChild>
-                        <Button variant="outline" onClick={() => setIsOpen(false)}>
+                        <Button onClick={() => setIsOpen(false)}>
                             Close
                         </Button>
                     </DialogClose>

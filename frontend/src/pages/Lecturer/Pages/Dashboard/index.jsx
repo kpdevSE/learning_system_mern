@@ -1,4 +1,3 @@
-
 import LecturerSidebar from "../../Components/LecturerSidebar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -174,35 +173,35 @@ export default function LecturerDashboard()
 
 
     const [message, setMessage] = useState([])
-
     const [filteredMessages, setFilteredMessages] = useState([]);
 
     useEffect(() =>
     {
-        const fetchUser = async () =>
+        const fetchMessages = async () =>
         {
             try
             {
-                const token = localStorage.getItem('token');
-                if (!token) return;
-
-                const response = await axios.get(`http://localhost:5000/api/users/me`, {
+                setLoading(true);
+                const token = localStorage.getItem("token");
+                const response = await axios.get(`http://localhost:5000/api/users/getnotifications`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                    withCredentials: true,
                 });
-
-
-                setUser(response.data.data);
-                console.log(response.data.data)
+                setMessage(response.data.notifications);
+                // Filter messages for teacher role immediately after fetching
+                const teacherMessages = response.data.notifications.filter(msg => msg.role === 'teacher');
+                setFilteredMessages(teacherMessages);
             } catch (err)
             {
-                console.error('Error fetching user:', err);
+                console.error("Error fetching notifications:", err);
+            } finally
+            {
+                setLoading(false);
             }
         };
 
-        fetchUser();
+        fetchMessages();
     }, []);
 
     const loggedRole = user.role;
@@ -233,39 +232,8 @@ export default function LecturerDashboard()
         fetchPayementCount();
     }, []);
 
-    useEffect(() =>
-    {
-        const fetchMessages = async () =>
-        {
-            try
-            {
-                setLoading(true);
-
-                const token = localStorage.getItem("token");
-
-
-
-                const response = await axios.get(`http://localhost:5000/api/users/getnotifications`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                setMessage(response.data.notifications);
-                console.log(response.data.notifications);
-            } catch (err)
-            {
-                console.error("Error fetching notifications:", err);
-            } finally
-            {
-                setLoading(false);
-            }
-        };
-
-        fetchMessages();
-    }, []);
     const [isOpen, setIsOpen] = useState(false);
-    const unreadCount = message ? message.filter(n => !n.read).length : 0;
+    const unreadCount = filteredMessages ? filteredMessages.filter(n => !n.read).length : 0;
 
     const formatDate = (dateString) =>
     {
@@ -320,7 +288,7 @@ export default function LecturerDashboard()
                                     <div>
                                         <h2 className="text-lg font-semibold">Notifications</h2>
                                         <p className="text-blue-100 text-sm">
-                                            {message ? message.length : 0} total, {unreadCount} unread
+                                            {filteredMessages ? filteredMessages.length : 0} total, {unreadCount} unread
                                         </p>
                                     </div>
                                     <div className="flex space-x-2">
@@ -345,14 +313,14 @@ export default function LecturerDashboard()
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
                                         <p className="text-sm text-gray-500">Loading notifications...</p>
                                     </div>
-                                ) : !message || message.length === 0 ? (
+                                ) : !filteredMessages || filteredMessages.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
                                         <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                                         <p className="text-sm">No notifications yet</p>
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-gray-100">
-                                        {message.map((notification, index) => (
+                                        {filteredMessages.map((notification, index) => (
                                             <div
                                                 key={notification._id || index}
                                                 className={`p-4 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50 border-l-4 border-blue-400' : ''
@@ -389,7 +357,7 @@ export default function LecturerDashboard()
                             </div>
 
                             {/* Footer */}
-                            {message && message.length > 0 && (
+                            {filteredMessages && filteredMessages.length > 0 && (
                                 <div className="border-t bg-gray-50 px-4 py-3">
                                     <button className="w-full text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
                                         View All Notifications

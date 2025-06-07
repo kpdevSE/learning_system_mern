@@ -171,7 +171,19 @@ export default function StudentDashboard()
         fetchMessages();
     }, []);
 
-    const unreadCount = message ? message.filter(n => !n.read).length : 0;
+    useEffect(() =>
+    {
+        if (user && message.length > 0)
+        {
+            // Only show notifications for student role
+            const filtered = message.filter((msg) => msg.role === 'student');
+            setFilteredMessages(filtered);
+            console.log("Filtered Student Messages:", filtered);
+        }
+    }, [user, message]);
+
+    // Update the notification count to only count student notifications
+    const unreadCount = filteredMessages ? filteredMessages.filter(n => !n.read).length : 0;
 
     const formatDate = (dateString) =>
     {
@@ -184,18 +196,6 @@ export default function StudentDashboard()
         if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
         return `${Math.floor(diffInMinutes / 1440)}d ago`;
     };
-
-    useEffect(() =>
-    {
-        if (user && message.length > 0)
-        {
-            const role = user.role;
-            const filtered = message.filter((msg) => msg.role === role);
-            setFilteredMessages(filtered);
-            console.log("Filtered Messages:", filtered);
-        }
-    }, [user, message]);
-
 
     return (
         <div className="flex h-screen bg-slate-50">
@@ -254,14 +254,14 @@ export default function StudentDashboard()
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
                                         <p className="text-sm text-gray-500">Loading notifications...</p>
                                     </div>
-                                ) : !message || message.length === 0 ? (
+                                ) : !filteredMessages || filteredMessages.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500">
                                         <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                                        <p className="text-sm">No notifications yet</p>
+                                        <p className="text-sm">No student notifications yet</p>
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-gray-100">
-                                        {message.map((notification, index) => (
+                                        {filteredMessages.map((notification, index) => (
                                             <div
                                                 key={notification._id || index}
                                                 className={`p-4 hover:bg-gray-50 transition-colors ${!notification.read ? 'bg-blue-50 border-l-4 border-blue-400' : ''
