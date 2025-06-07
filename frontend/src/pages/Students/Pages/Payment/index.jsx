@@ -482,7 +482,7 @@ export default function Payment()
                                                 </div>
                                             </div>
 
-                                            {payement.map((e) =>
+                                            {/* {payement.map((e) =>
                                             {
                                                 return (
 
@@ -493,7 +493,7 @@ export default function Payment()
                                                     </div>
                                                 )
 
-                                            })}
+                                            })} */}
 
                                             <table className="w-full mb-6">
                                                 <thead>
