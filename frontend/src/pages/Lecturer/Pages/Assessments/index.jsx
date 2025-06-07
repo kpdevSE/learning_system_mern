@@ -60,6 +60,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import ExamCompoennt from "../../Components/ExamComponent";
 
 export default function AssessmentsPage()
 {
@@ -422,6 +423,7 @@ export default function AssessmentsPage()
                     </div>
 
                     <div className="flex gap-4">
+                        <ExamCompoennt />
                         <Dialog open={open} onOpenChange={setOpen}>
                             <DialogTrigger asChild>
                                 <Button className="flex items-center gap-2">

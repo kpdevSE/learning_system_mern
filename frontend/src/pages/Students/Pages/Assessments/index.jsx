@@ -10,6 +10,7 @@ import { CheckCircle, Clock, AlertCircle, FileText, Calendar, BarChart3, Bot, Ey
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from "react-router-dom";
+import ExamView from "../../Components/ExamDialog";
 
 export default function Assessments()
 {
@@ -137,7 +138,7 @@ export default function Assessments()
                         <h1 className="text-3xl font-bold tracking-tight">Assessments</h1>
                         <p className="text-muted-foreground">Track and manage all your academic assessments</p>
                     </div>
-
+                    <ExamView />
                 </div>
 
                 {/* Stats Overview */}

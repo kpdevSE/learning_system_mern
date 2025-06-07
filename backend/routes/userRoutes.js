@@ -13,6 +13,7 @@ const { createBooking, getMyBookings, deleteBooking, getLecturerBookings, getLec
 const { createAssessment, getAllAssessments, deleteAssessment, } = require('../controllers/assessmentController');
 
 const uploadPdfconfig = require('../config/uploadPFD');
+const { saveExam, getExams, getExamById, updateExam, deleteExam, publishExam, getAllExams, getExamByIdUserDetails } = require('../controllers/examController');
 
 
 
@@ -77,6 +78,16 @@ router.get('/getLecturerbookings', getLecturerBookingsByEmail)
 router.post("/uploadassessments", uploadPdfconfig.single('pdfFile'), createAssessment);
 router.get('/getassessments', getAllAssessments)
 router.delete('/deleteassessment/:id', deleteAssessment)
+
+// exams
+router.post('/saveexams', saveExam);
+router.get('/getexams', getExams);
+router.get('/exams/:id', getExamById);
+router.put('/exams/:id', updateExam);
+router.delete('/exams/:id', deleteExam);
+router.patch('/exams/:id/publish', publishExam);
+router.get('/allexamsget', getAllExams)
+router.get('/detailsexams/:id', getExamByIdUserDetails);
 
 
 

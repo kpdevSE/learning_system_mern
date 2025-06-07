@@ -5,6 +5,7 @@ import { Separator } from '../../../components/ui/separator';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import DrawerComponents from './ExamsDrawer';
 
 export default function LecturerSidebar()
 {
@@ -184,6 +185,7 @@ export default function LecturerSidebar()
                             </a>
                         ))}
                     </nav>
+                    <DrawerComponents />
 
                     {/* Footer */}
                     <div className="p-4">

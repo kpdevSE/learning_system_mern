@@ -1,32 +1,26 @@
 const mongoose = require('mongoose');
 
-const questionSchema = new mongoose.Schema({
-    question: {
+const essayQuestionSchema = new mongoose.Schema({
+    questionText: {
         type: String,
         required: true,
         trim: true
     },
-    type: {
+    marks: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    instructions: {
         type: String,
-        enum: ['multiple-choice', 'essay', 'short-answer'],
+        trim: true
+    },
+    questionOrder: {
+        type: Number,
         required: true
-    },
-    options: [{
-        type: String,
-        trim: true
-    }],
-    correctAnswer: {
-        type: Number,
-        required: function ()
-        {
-            return this.type === 'multiple-choice';
-        }
-    },
-    points: {
-        type: Number,
-        required: true,
-        min: 1
     }
+}, {
+    timestamps: true
 });
 
 const examSchema = new mongoose.Schema({
@@ -35,64 +29,49 @@ const examSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    description: {
+    subject: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    duration: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    totalMarks: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    instructions: {
         type: String,
         trim: true
     },
-    questions: [questionSchema],
-    totalPoints: {
-        type: Number,
-        required: true
-    },
+    essayQuestions: [essayQuestionSchema],
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    },
-    course: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
-        required: true
-    },
-    startTime: {
-        type: Date,
-        required: true
-    },
-    endTime: {
-        type: Date,
-        required: true
-    },
-    duration: {
-        type: Number, // Duration in minutes
+        ref: 'User', // Assuming you have a User model
         required: true
     },
     status: {
         type: String,
-        enum: ['draft', 'published', 'completed'],
+        enum: ['draft', 'published', 'archived'],
         default: 'draft'
+    },
+    examDate: {
+        type: Date
     },
     isActive: {
         type: Boolean,
         default: true
     }
 }, {
-    timestamps: true // Adds createdAt and updatedAt fields
+    timestamps: true
 });
 
-// Calculate total points before saving
-examSchema.pre('save', function (next)
-{
-    if (this.questions && this.questions.length > 0)
-    {
-        this.totalPoints = this.questions.reduce((sum, question) => sum + question.points, 0);
-    }
-    next();
-});
+// Index for better query performance
+examSchema.index({ title: 1, subject: 1 });
+examSchema.index({ createdBy: 1 });
 
-// Add index for better query performance
-examSchema.index({ course: 1, status: 1 });
-examSchema.index({ createdBy: 1, status: 1 });
-
-const Exam = mongoose.model('Exam', examSchema);
-
-module.exports = Exam;
+module.exports = mongoose.model('Exam', examSchema);

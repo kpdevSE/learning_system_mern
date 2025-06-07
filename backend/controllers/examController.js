@@ -1,44 +1,40 @@
 const Exam = require('../models/exams');
 
 // Create a new exam
-const createExam = async (req, res) =>
+exports.saveExam = async (req, res) =>
 {
     try
     {
         const {
             title,
-            description,
-            questions,
-            course,
-            startTime,
-            endTime,
-            duration
+            subject,
+            duration,
+            instructions,
+            essays,
+            examDate
         } = req.body;
 
-        // Validate required fields
-        if (!title || !questions || !course || !startTime || !endTime || !duration)
-        {
-            return res.status(400).json({
-                success: false,
-                message: 'Please provide all required fields'
-            });
-        }
+        const totalMarks = essays.reduce((sum, essay) => sum + parseInt(essay.marks), 0);
 
-        // Create new exam
-        const exam = new Exam({
+        const essayQuestions = essays.map((essay, index) => ({
+            questionText: essay.question,
+            marks: parseInt(essay.marks),
+            instructions: essay.instructions || '',
+            questionOrder: index + 1
+        }));
+
+        const newExam = new Exam({
             title,
-            description,
-            questions,
-            course,
-            startTime,
-            endTime,
-            duration,
-            createdBy: req.user._id, // Assuming user is authenticated and available in req.user
-            status: 'draft'
+            subject,
+            duration: parseInt(duration),
+            totalMarks,
+            instructions: instructions || '',
+            essayQuestions,
+            createdBy: req.user.id,
+            examDate: examDate ? new Date(examDate) : null
         });
 
-        // Save exam to database
-        const savedExam = await exam.save();
+        const savedExam = await newExam.save();
 
         res.status(201).json({
             success: true,
@@ -51,21 +47,91 @@ const createExam = async (req, res) =>
         console.error('Error creating exam:', error);
         res.status(500).json({
             success: false,
-            message: 'Error creating exam',
-            error: error.message
+            message: 'Internal server error',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
         });
     }
 };
 
-// Delete an exam
-const deleteExam = async (req, res) =>
+// Get all exams for a user
+exports.getExams = async (req, res) =>
 {
     try
     {
-        const { examId } = req.params;
+        const { page = 1, limit = 10, subject, status } = req.query;
 
-        // Find and delete the exam
-        const exam = await Exam.findById(examId);
+        const query = {
+            createdBy: req.user.id,
+            isActive: true
+        };
+
+        if (subject) query.subject = { $regex: subject, $options: 'i' };
+        if (status) query.status = status;
+
+        const exams = await Exam.find(query)
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .populate('createdBy', 'name email');
+
+        const total = await Exam.countDocuments(query);
+
+        res.status(200).json({
+            success: true,
+            data: exams,
+            pagination: {
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / limit),
+                totalItems: total,
+                itemsPerPage: parseInt(limit)
+            }
+        });
+
+    } catch (error)
+    {
+        console.error('Error fetching exams:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+exports.getAllExams = async (req, res) =>
+{
+    try
+    {
+        const exams = await Exam.find()
+            .sort({ createdAt: -1 })
+            .populate('createdBy', 'name email');
+
+        res.status(200).json({
+            success: true,
+            data: exams
+        });
+    } catch (error)
+    {
+        console.error('Error fetching all exams:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+
+// Get single exam by ID
+exports.getExamById = async (req, res) =>
+{
+    try
+    {
+        const examId = req.params.id;
+
+        const exam = await Exam.findOne({
+            _id: examId,
+            createdBy: req.user.id,
+            isActive: true
+        }).populate('createdBy', 'name email');
 
         if (!exam)
         {
@@ -75,18 +141,140 @@ const deleteExam = async (req, res) =>
             });
         }
 
-        // Check if the user is authorized to delete the exam
-        if (exam.createdBy.toString() !== req.user._id.toString())
+        res.status(200).json({
+            success: true,
+            data: exam
+        });
+
+    } catch (error)
+    {
+        console.error('Error fetching exam:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+exports.getExamByIdUserDetails = async (req, res) =>
+{
+    try
+    {
+        const examId = req.params.id;
+
+        const exam = await Exam.findOne({
+            _id: examId,
+            isActive: true
+        }).populate('createdBy', 'name email');
+
+        if (!exam)
         {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
-                message: 'Not authorized to delete this exam'
+                message: 'Exam not found'
             });
         }
 
-        // Instead of actually deleting, we'll set isActive to false (soft delete)
-        exam.isActive = false;
-        await exam.save();
+        res.status(200).json({
+            success: true,
+            data: exam
+        });
+
+    } catch (error)
+    {
+        console.error('Error fetching exam:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+
+// Update exam
+exports.updateExam = async (req, res) =>
+{
+    try
+    {
+        const examId = req.params.id;
+        const {
+            title,
+            subject,
+            duration,
+            instructions,
+            essays,
+            status,
+            examDate
+        } = req.body;
+
+        const totalMarks = essays.reduce((sum, essay) => sum + parseInt(essay.marks), 0);
+
+        const essayQuestions = essays.map((essay, index) => ({
+            questionText: essay.question,
+            marks: parseInt(essay.marks),
+            instructions: essay.instructions || '',
+            questionOrder: index + 1
+        }));
+
+        const updatedExam = await Exam.findOneAndUpdate(
+            { _id: examId, createdBy: req.user.id },
+            {
+                title,
+                subject,
+                duration: parseInt(duration),
+                totalMarks,
+                instructions: instructions || '',
+                essayQuestions,
+                status,
+                examDate: examDate ? new Date(examDate) : null
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedExam)
+        {
+            return res.status(404).json({
+                success: false,
+                message: 'Exam not found or you do not have permission to update it'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Exam updated successfully',
+            data: updatedExam
+        });
+
+    } catch (error)
+    {
+        console.error('Error updating exam:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+// Delete exam (soft delete)
+exports.deleteExam = async (req, res) =>
+{
+    try
+    {
+        const examId = req.params.id;
+
+        const deletedExam = await Exam.findOneAndUpdate(
+            { _id: examId, createdBy: req.user.id },
+            { isActive: false },
+            { new: true }
+        );
+
+        if (!deletedExam)
+        {
+            return res.status(404).json({
+                success: false,
+                message: 'Exam not found or you do not have permission to delete it'
+            });
+        }
 
         res.status(200).json({
             success: true,
@@ -98,20 +286,23 @@ const deleteExam = async (req, res) =>
         console.error('Error deleting exam:', error);
         res.status(500).json({
             success: false,
-            message: 'Error deleting exam',
-            error: error.message
+            message: 'Internal server error'
         });
     }
 };
 
-// Hard delete an exam (if needed)
-const hardDeleteExam = async (req, res) =>
+// Publish exam
+exports.publishExam = async (req, res) =>
 {
     try
     {
-        const { examId } = req.params;
+        const examId = req.params.id;
 
-        const exam = await Exam.findById(examId);
+        const exam = await Exam.findOneAndUpdate(
+            { _id: examId, createdBy: req.user.id },
+            { status: 'published' },
+            { new: true }
+        );
 
         if (!exam)
         {
@@ -121,172 +312,18 @@ const hardDeleteExam = async (req, res) =>
             });
         }
 
-        // Check if the user is authorized to delete the exam
-        if (exam.createdBy.toString() !== req.user._id.toString())
-        {
-            return res.status(403).json({
-                success: false,
-                message: 'Not authorized to delete this exam'
-            });
-        }
-
-        // Actually delete the exam from database
-        await Exam.findByIdAndDelete(examId);
-
         res.status(200).json({
             success: true,
-            message: 'Exam permanently deleted'
+            message: 'Exam published successfully',
+            data: exam
         });
 
     } catch (error)
     {
-        console.error('Error hard deleting exam:', error);
+        console.error('Error publishing exam:', error);
         res.status(500).json({
             success: false,
-            message: 'Error deleting exam',
-            error: error.message
+            message: 'Internal server error'
         });
     }
-};
-
-// Get all exams with filtering options
-const getAllExams = async (req, res) =>
-{
-    try
-    {
-        const {
-            course,
-            status,
-            createdBy,
-            isActive = true, // Default to only active exams
-            page = 1,
-            limit = 10,
-            sortBy = 'createdAt',
-            sortOrder = 'desc'
-        } = req.query;
-
-        // Build filter object
-        const filter = { isActive };
-
-        if (course) filter.course = course;
-        if (status) filter.status = status;
-        if (createdBy) filter.createdBy = createdBy;
-
-        // Calculate skip value for pagination
-        const skip = (page - 1) * limit;
-
-        // Build sort object
-        const sort = {};
-        sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
-
-        // Get exams with pagination and sorting
-        const exams = await Exam.find(filter)
-            .sort(sort)
-            .skip(skip)
-            .limit(parseInt(limit))
-            .populate('course', 'name code') // Populate course details
-            .populate('createdBy', 'name email'); // Populate creator details
-
-        // Get total count for pagination
-        const total = await Exam.countDocuments(filter);
-
-        res.status(200).json({
-            success: true,
-            data: exams,
-            pagination: {
-                total,
-                page: parseInt(page),
-                pages: Math.ceil(total / limit),
-                limit: parseInt(limit)
-            }
-        });
-
-    } catch (error)
-    {
-        console.error('Error fetching exams:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching exams',
-            error: error.message
-        });
-    }
-};
-
-// Get exams for a specific course
-const getCourseExams = async (req, res) =>
-{
-    try
-    {
-        const { courseId } = req.params;
-        const { status, isActive = true } = req.query;
-
-        const filter = {
-            course: courseId,
-            isActive
-        };
-
-        if (status) filter.status = status;
-
-        const exams = await Exam.find(filter)
-            .sort({ createdAt: -1 })
-            .populate('createdBy', 'name email');
-
-        res.status(200).json({
-            success: true,
-            data: exams
-        });
-
-    } catch (error)
-    {
-        console.error('Error fetching course exams:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching course exams',
-            error: error.message
-        });
-    }
-};
-
-// Get exams created by a specific user
-const getUserExams = async (req, res) =>
-{
-    try
-    {
-        const { userId } = req.params;
-        const { status, isActive = true } = req.query;
-
-        const filter = {
-            createdBy: userId,
-            isActive
-        };
-
-        if (status) filter.status = status;
-
-        const exams = await Exam.find(filter)
-            .sort({ createdAt: -1 })
-            .populate('course', 'name code');
-
-        res.status(200).json({
-            success: true,
-            data: exams
-        });
-
-    } catch (error)
-    {
-        console.error('Error fetching user exams:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error fetching user exams',
-            error: error.message
-        });
-    }
-};
-
-module.exports = {
-    createExam,
-    deleteExam,
-    hardDeleteExam,
-    getAllExams,
-    getCourseExams,
-    getUserExams
 };
