@@ -377,9 +377,7 @@ export default function Payment()
                         <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
                         <p className="text-muted-foreground">Manage your payments and view transaction history</p>
                     </div>
-                    <Button onClick={() => setNewPaymentDialogOpen(true)} className='bg-black hover:bg-black'>
-                        <DollarSign className="mr-2 h-4 w-4" /> Make a Payment
-                    </Button>
+
                 </div>
 
                 {/* Payment Stats */}
@@ -647,106 +645,6 @@ export default function Payment()
                     </TabsContent>
                 </Tabs>
             </div>
-
-            {/* Make Payment Dialog */}
-            <Dialog open={newPaymentDialogOpen} onOpenChange={setNewPaymentDialogOpen}>
-                <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                        <DialogTitle>Make a Payment</DialogTitle>
-                        <DialogDescription>
-                            Enter payment details to process your transaction
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={handlePaymentSubmit}>
-                        <div className="space-y-4 my-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="payment-type">Payment Type</Label>
-                                <Select
-                                    value={paymentMethod}
-                                    onValueChange={setPaymentMethod}
-                                >
-                                    <SelectTrigger id="payment-type">
-                                        <SelectValue placeholder="Select payment type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="credit-card">Credit Card (•••• 4242)</SelectItem>
-                                        <SelectItem value="paypal">PayPal</SelectItem>
-                                        <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
-                                        <SelectItem value="new-card">New Credit Card</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="invoice">Select Invoice</Label>
-                                <Select defaultValue={pendingPayments[0]?.id}>
-                                    <SelectTrigger id="invoice">
-                                        <SelectValue placeholder="Select invoice" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {pendingPayments.map(payment => (
-                                            <SelectItem key={payment.id} value={payment.id}>
-                                                {payment.description} - ${payment.amount.toFixed(2)}
-                                            </SelectItem>
-                                        ))}
-                                        <SelectItem value="custom">Custom Amount</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {paymentMethod === "new-card" && (
-                                <>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="card-number">Card Number</Label>
-                                        <Input id="card-number" placeholder="1234 5678 9012 3456" />
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="expiry">Expiry Date</Label>
-                                            <Input id="expiry" placeholder="MM/YY" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="cvc">CVC</Label>
-                                            <Input id="cvc" placeholder="123" />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name">Name on Card</Label>
-                                        <Input id="name" placeholder="John Doe" />
-                                    </div>
-                                </>
-                            )}
-
-                            <div className="space-y-2">
-                                <Label htmlFor="amount">Amount</Label>
-                                <div className="relative">
-                                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                        id="amount"
-                                        className="pl-8"
-                                        defaultValue={pendingPayments[0]?.amount.toFixed(2)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="notes">Notes (Optional)</Label>
-                                <Input id="notes" placeholder="Add payment notes" />
-                            </div>
-                        </div>
-
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setNewPaymentDialogOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" className="bg-black hover:bg-black">Process Payment</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
         </div>
     );
 }

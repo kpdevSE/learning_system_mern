@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Link } from "react-router-dom";
 import ExamView from "../../Components/ExamDialog";
+import NoticeComponent from "../../Components/NoticeComponent";
 
 export default function Assessments()
 {
@@ -139,6 +140,7 @@ export default function Assessments()
                         <p className="text-muted-foreground">Track and manage all your academic assessments</p>
                     </div>
                     <ExamView />
+                    <NoticeComponent />
                 </div>
 
                 {/* Stats Overview */}
